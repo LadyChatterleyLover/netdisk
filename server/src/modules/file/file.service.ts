@@ -33,7 +33,18 @@ export class FileService {
   ) {
     const size = file.size
     const ext = file.mimetype.split('/')[1]
-    const filename = decodeURIComponent(name)
+    let filename = decodeURI(escape(file.originalname))
+    const existFiles = await this.fileRepository
+      .createQueryBuilder('file')
+      .where('file.name LIKE :name', {
+        name: `%${filename.replace(`.${ext}`, '')}%`,
+      })
+      .getMany()
+    if (existFiles.length) {
+      filename = `${filename.replace(`.${ext}`, '')}(${
+        existFiles.length
+      }).${ext}`
+    }
     const url = await this.uploadFile(filename, stream)
     const user = await this.userRepository.findOne({
       where: {

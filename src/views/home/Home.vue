@@ -104,15 +104,20 @@ const handleCustomRequest: UploadProps['customRequest'] = (options) => {
   const formData = new FormData()
   formData.append('file', file)
   loading.value = true
-  api.file.uploadFile(formData).then((res) => {
-    if (res.code === 200) {
-      message.success(res.msg)
-      getFileList()
-    } else {
-      message.error(res.msg)
-    }
-    loading.value = false
-  })
+  api.file
+    .uploadFile(formData)
+    .then((res) => {
+      if (res.code === 200) {
+        message.success(res.msg)
+        getFileList()
+      } else {
+        message.error(res.msg)
+      }
+      loading.value = false
+    })
+    .catch(() => {
+      loading.value = false
+    })
 }
 
 watch(
