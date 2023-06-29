@@ -1,7 +1,7 @@
 import { post } from '../request'
 
 export default {
-  register(params: { username: string; password: string }) {
+  register(params: { username: string; password: string; email: string }) {
     return post('/user/register', params)
   },
   login(params: { username: string; password: string }) {

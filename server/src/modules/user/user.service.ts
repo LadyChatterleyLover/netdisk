@@ -15,7 +15,7 @@ export class UserService {
   ) {}
 
   async register(userDto: UserDto) {
-    const { username, password } = userDto
+    const { username, password, email } = userDto
     const existUser = await this.userRepository.findOne({
       where: {
         username,
@@ -30,6 +30,7 @@ export class UserService {
     const res = await this.userRepository.save({
       username,
       password: createPassword(password),
+      email,
     })
     if (res) {
       delete res.password

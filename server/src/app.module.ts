@@ -14,7 +14,6 @@ import 'winston-daily-rotate-file'
 import logger from './middlewares/logger.middleware'
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core'
 import UnifyExceptionFilter from './filters/uinify-exception.filter'
-import { UnifyResponseInterceptor } from './interceptors/unify-response.interceptor'
 import { UserModule } from './modules/user/user.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { FileModule } from './modules/file/file.module'
@@ -70,11 +69,6 @@ import { FileModule } from './modules/file/file.module'
     {
       provide: APP_FILTER,
       useClass: UnifyExceptionFilter,
-    },
-    // 应用拦截器
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: UnifyResponseInterceptor,
     },
   ],
 })

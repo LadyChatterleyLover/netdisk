@@ -14,3 +14,7 @@ body,
 .el-menu {
   height: 100%;
 }
+
+svg {
+  vertical-align: initial;
+}

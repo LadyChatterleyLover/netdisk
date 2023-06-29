@@ -56,8 +56,6 @@ axios.interceptors.response.use(
         case 404:
           message.error('请求失败！请您稍后重试')
           break
-          message.error('请求方式错误！请您稍后重试')
-          break
         case 500:
           message.error(response.data.msg)
           break
@@ -269,7 +267,7 @@ const request = <T>(
       })
         .then((res) => {
           if (res && res.data) {
-            if (res.status === 200) {
+            if (res.status === 200 || res.status === 201) {
               resolve(res.data)
             } else {
               reject(res.data)
