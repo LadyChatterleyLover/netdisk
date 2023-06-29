@@ -3,7 +3,7 @@
     <div
       class="w-full h-10 flex justify-around items-center cursor-pointer"
       :class="{ active: activeIndex === 0 }"
-      @click="clickItem(0)"
+      @click="clickItem('all', 0)"
     >
       <div class="flex">
         <div>
@@ -21,7 +21,7 @@
         :key="index"
         class="w-full h-10 flex pl-[50px] items-center mt-5 cursor-pointer"
         :class="{ active: activeIndex === index + 1 }"
-        @click="clickItem(index + 1)"
+        @click="clickItem(item.type, index + 1)"
       >
         <div>
           <component :is="item.icon" class="text-xs" />
@@ -38,34 +38,42 @@ import { ref } from 'vue'
 interface MenuItem {
   name: string
   icon: string
+  type: string
 }
 
 const menuList: MenuItem[] = [
   {
     name: '图片',
     icon: 'file-image-outlined',
+    type: 'image',
   },
   {
     name: '文档',
     icon: 'file-outlined',
+    type: 'file',
   },
   {
     name: '视频',
     icon: 'video-camera-outlined',
+    type: 'video',
   },
   {
     name: '音频',
     icon: 'play-square-outlined',
+    type: 'audio',
   },
   {
     name: '其他',
     icon: 'ellipsis-outlined',
+    type: 'other',
   },
 ]
 
 const activeIndex = ref(0)
+const category = ref('all')
 
-const clickItem = (index: number) => {
+const clickItem = (type: string, index: number) => {
+  category.value = type
   activeIndex.value = index
 }
 </script>
