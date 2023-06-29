@@ -3,10 +3,12 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import Antd from 'ant-design-vue'
 import * as Icons from '@ant-design/icons-vue'
+import VXETable from 'vxe-table'
 import App from './App.vue'
 import router from './router'
 import 'ant-design-vue/dist/antd.css'
 import 'animate.css'
+import 'vxe-table/lib/style.css'
 
 const app = createApp(App)
 
@@ -17,5 +19,6 @@ for (const [key, component] of Object.entries(Icons)) {
 app.use(createPinia())
 app.use(router)
 app.use(Antd)
+app.use(VXETable)
 
 app.mount('#app')

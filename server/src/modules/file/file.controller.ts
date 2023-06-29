@@ -69,7 +69,7 @@ export class FileController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateTaskDto) {
-    return this.fileService.updateFile(+id, updateTaskDto)
+  async update(@Param('id') id: string, @Body() updateFileDto) {
+    return this.fileService.updateFile(+id, updateFileDto)
   }
 }

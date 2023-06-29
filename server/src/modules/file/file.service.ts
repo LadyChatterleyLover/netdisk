@@ -28,7 +28,7 @@ export class FileService {
     name: string,
     stream: Readable,
     file: UploadFile,
-    user_id: string,
+    user_id: number,
     dirId: number,
   ) {
     const size = file.size
@@ -37,7 +37,7 @@ export class FileService {
     const url = await this.uploadFile(filename, stream)
     const user = await this.userRepository.findOne({
       where: {
-        id: +user_id,
+        id: user_id,
       },
     })
     const res = await this.fileRepository.save({

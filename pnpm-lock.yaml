@@ -29,6 +29,12 @@ dependencies:
   vue-router:
     specifier: ^4.2.2
     version: 4.2.2(vue@3.3.4)
+  vxe-table:
+    specifier: ^4.4.2
+    version: 4.4.2(vue@3.3.4)(xe-utils@3.5.11)
+  xe-utils:
+    specifier: ^3.5.11
+    version: 3.5.11
 
 devDependencies:
   '@commitlint/cli':
@@ -7136,6 +7142,19 @@ packages:
       '@vue/server-renderer': 3.3.4(vue@3.3.4)
       '@vue/shared': 3.3.4
 
+  /vxe-table@4.4.2(vue@3.3.4)(xe-utils@3.5.11):
+    resolution:
+      {
+        integrity: sha512-3UdfSeMZ/D5nfTohcnZQQ2gkFZnhvf0v83usOCwx3B1nzBNKAJumg3QviMEox5SdikT8pq9z4vz3a0pesPPrJw==,
+      }
+    peerDependencies:
+      vue: ^3.2.28
+      xe-utils: ^3.5.0
+    dependencies:
+      vue: 3.3.4
+      xe-utils: 3.5.11
+    dev: false
+
   /warning@4.0.3:
     resolution:
       {
@@ -7232,6 +7251,13 @@ packages:
         integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==,
       }
     dev: true
+
+  /xe-utils@3.5.11:
+    resolution:
+      {
+        integrity: sha512-lyKc/lTBga1Zb63p+FED8mtxLnYIjSS8PVJM1N64NGdCu/3d1XubaVeke2p91RHssP0ExVAl2LUqZYperoz76Q==,
+      }
+    dev: false
 
   /xml-name-validator@4.0.0:
     resolution:

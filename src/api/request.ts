@@ -10,7 +10,7 @@ axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL
 axios.defaults.timeout = 60000 * 2
 axios.interceptors.request.use(
   (config) => {
-    const token = localGet('Kte-token')
+    const token = localGet('disk-token')
     config.headers.Authorization = token
     return config
   },
@@ -19,8 +19,7 @@ axios.interceptors.request.use(
   }
 )
 ;(axios as any).setToken = (token: string) => {
-  axios.defaults.headers['Kte-Auth'] = token
-  window.localStorage.setItem('Kte-token', token)
+  axios.defaults.headers['Authorization'] = token
 }
 
 axios.interceptors.response.use(
