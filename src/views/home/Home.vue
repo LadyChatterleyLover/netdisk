@@ -58,43 +58,29 @@
   </div>
   <div class="font-bold text-sm my-5">全部文件</div>
   <a-spin :spinning="loading" tip="上传中...">
-    <div class="mt-8 file-list-table">
-      <vxe-table :data="fileList">
-        <vxe-column title="文件名" align="center">
-          <template #default="{ row }">
-            {{ row.name }}
-          </template>
-        </vxe-column>
-        <vxe-column title="修改时间" sortable align="center">
-          <template #default="{ row }">
-            {{ dayjs(row.updateAt).format('YYYY-MM-DD HH:mm:ss') }}
-          </template>
-        </vxe-column>
-        <vxe-column title="大小" field="size" sortable align="center">
-          <template #default="{ row }">
-            {{ row.isDir ? '-' : (row.size / 1024).toFixed(2) + 'KB' }}
-          </template>
-        </vxe-column>
-      </vxe-table>
-    </div>
+    <FileList :file-list="fileList" />
   </a-spin>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import dayjs from 'dayjs'
 import { type UploadProps, message } from 'ant-design-vue'
 import type { FileItem } from '@/types/file'
 import api from '@/api'
+import FileList from '@/components/home/FileList.vue'
 
 const route = useRoute()
 const category = ref('')
+
 const loading = ref(false)
 const fileList = ref<FileItem[]>([])
 
 const getFileList = () => {
   api.file.getFileList().then((res) => {
+    res.data.forEach((item) => {
+      item.checked = false
+    })
     fileList.value = res.data
   })
 }
@@ -136,5 +122,3 @@ onMounted(() => {
   getFileList()
 })
 </script>
-
-<style scoped></style>
