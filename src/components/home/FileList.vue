@@ -1,6 +1,6 @@
 <template>
   <div class="mt-8 file-list-table">
-    <vxe-table :data="fileList">
+    <vxe-table :data="tableData">
       <vxe-column title="文件名">
         <template #header="{ column }">
           <div class="flex">
@@ -12,10 +12,18 @@
         </template>
         <template #default="{ row }">
           <div class="flex items-center file-item cursor-pointer">
-            <div class="mx-2 invisible check-item">
+            <div v-if="!row.isAdd" class="mx-2 invisible check-item">
               <a-checkbox v-model:checked="row.checked" />
             </div>
             <div class="w-8 flex">
+              <img
+                v-if="row.isDir"
+                width="32"
+                height="32"
+                src="../../assets/dir.png"
+                alt="dir"
+                :style="{ marginLeft: row.isAdd ? '32px' : '0' }"
+              />
               <div
                 v-if="imgType.includes(row.ext.toLowerCase())"
                 class="h-8 w-8 rounded-md"
@@ -24,9 +32,26 @@
               </div>
             </div>
             <div class="flex-1 flex ml-[16px]">
-              {{ row.name }}
+              <div v-if="row.isAdd" class="flex ml-8">
+                <a-input v-model:value="row.name" size="small" allow-clear />
+              </div>
+              <div v-else>{{ row.name }}</div>
             </div>
-            <div class="hidden action">
+            <div v-if="row.isAdd" class="flex items-center">
+              <div
+                class="w-6 h-6 flex justify-center items-center ml-2 bg-[#06a7ff] text-white rounded-md"
+                @click="confirm(row)"
+              >
+                <check-outlined class="text-small" />
+              </div>
+              <div
+                class="w-6 h-6 flex justify-center items-center ml-3 bg-[#06a7ff] text-white rounded-md"
+                @click="cancel"
+              >
+                <close-outlined class="text-small" />
+              </div>
+            </div>
+            <div v-if="!row.isAdd" class="hidden action">
               <share-alt-outlined class="mr-3 text-sm" style="color: #06a7ff" />
               <download-outlined class="mr-3 text-sm" style="color: #06a7ff" />
               <delete-outlined class="mr-3 text-sm" style="color: #06a7ff" />
@@ -54,17 +79,58 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { inject, ref, watch } from 'vue'
 import dayjs from 'dayjs'
+import { cloneDeep } from 'lodash-es'
+import { message } from 'ant-design-vue'
+import api from '../../api'
 import type { FileItem } from '@/types/file'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gi']
+const getFileList = inject<() => void>('getFileList')
 
-defineProps<{
+const props = defineProps<{
   fileList: FileItem[]
 }>()
+const emits = defineEmits<{
+  'update:fileList': [val: FileItem[]]
+}>()
 
+const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
+
+const confirm = (row: FileItem) => {
+  if (!row.name) {
+    message.error('文件夹名字不能为空!')
+    return
+  }
+  api.file
+    .createDir({
+      name: row.name,
+    })
+    .then((res: any) => {
+      if (res.code === 200) {
+        row.isAdd = false
+        getFileList?.()
+        message.success(res.msg)
+      } else {
+        message.error(res.msg)
+      }
+    })
+}
+
+const cancel = () => {
+  tableData.value.shift()
+  emits('update:fileList', tableData.value)
+}
+
+watch(
+  () => props.fileList,
+  (val) => {
+    tableData.value = cloneDeep(val)
+  },
+  { deep: true, immediate: true }
+)
 </script>
 
 <style scoped lang="scss">

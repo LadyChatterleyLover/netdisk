@@ -1,12 +1,13 @@
 export interface FileItem {
-  id: number
+  id?: number
   name: string
   ext: string
   url: string
   isDir: boolean
-  dirId: number
+  dirId?: number
   size: number
   createAt: string
   updateAt: string
   checked: boolean
+  isAdd: boolean
 }

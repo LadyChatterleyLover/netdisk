@@ -42,7 +42,7 @@
     >
       <div class="flex h-full items-center">
         <folder-add-outlined class="text-sm" />
-        <div class="ml-2 font-bold">新建文件夹</div>
+        <div class="ml-2 font-bold" @click="addDir">新建文件夹</div>
       </div>
       <a-divider type="vertical" />
       <div class="flex h-full items-center">
@@ -58,14 +58,15 @@
   </div>
   <div class="font-bold text-sm my-5">全部文件</div>
   <a-spin :spinning="loading" tip="上传中...">
-    <FileList :file-list="fileList" />
+    <FileList v-model:file-list="fileList" />
   </a-spin>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { type UploadProps, message } from 'ant-design-vue'
+import dayjs from 'dayjs'
 import type { FileItem } from '@/types/file'
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
@@ -80,6 +81,7 @@ const getFileList = () => {
   api.file.getFileList().then((res) => {
     res.data.forEach((item) => {
       item.checked = false
+      item.isAdd = false
     })
     fileList.value = res.data
   })
@@ -105,6 +107,22 @@ const handleCustomRequest: UploadProps['customRequest'] = (options) => {
       loading.value = false
     })
 }
+
+const addDir = () => {
+  fileList.value.unshift({
+    name: '',
+    createAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    updateAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    isDir: true,
+    size: 0,
+    checked: false,
+    ext: '',
+    url: '',
+    isAdd: true,
+  })
+}
+
+provide('getFileList', getFileList)
 
 watch(
   () => route.query,
