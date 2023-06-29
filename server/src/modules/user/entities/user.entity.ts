@@ -25,6 +25,9 @@ export class User {
   @Column({ default: '' })
   nickname: string
 
+  @Column({ default: '' })
+  avatar: string
+
   @OneToMany(() => File, (file) => file.user)
   files: File[]
 

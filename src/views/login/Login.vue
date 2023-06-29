@@ -240,7 +240,7 @@ import api from '@/api'
 import { localSet } from '@/utils/util'
 
 const router = useRouter()
-const isLogin = ref(false)
+const isLogin = ref(true)
 const forget = ref(false)
 const canFind = ref(false)
 
@@ -248,7 +248,7 @@ const formRef = ref<FormInstance>()
 const forgetFormRef = ref<FormInstance>()
 const updateFormRef = ref<FormInstance>()
 const loginModel = ref({
-  username: 'lp',
+  username: 'dudu',
   password: '111223',
 })
 const registerModel = ref({
@@ -371,10 +371,10 @@ const login = () => {
         })
         .then((res: any) => {
           if (res.code === 200) {
-            const token = `Bearer ${res.data.token}`
+            const token = res.data.token
             if (token) {
               localSet('disk-token', token)
-              localSet('userInfo', res.data.user)
+              localSet('disk-user', res.data.user)
               message.success('登录成功！')
               router.push('/')
             }
@@ -403,10 +403,10 @@ const register = () => {
           })
           .then((res: any) => {
             if (res.code === 200) {
-              const token = `Bearer ${res.access_token}`
+              const token = res.data.token
               if (token) {
                 localSet('disk-token', token)
-                localSet('userInfo', res.user_info)
+                localSet('disk-user', res.data.user)
                 message.success('登录成功！')
                 router.push('/')
               }

@@ -10,8 +10,7 @@
 .html,
 body,
 #app,
-.el-container,
-.el-menu {
+.ant-layout {
   height: 100%;
 }
 
