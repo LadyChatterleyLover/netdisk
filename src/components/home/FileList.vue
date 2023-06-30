@@ -59,6 +59,13 @@
                 <img class="w-full h-full" src="../../assets/docx.png" />
               </div>
               <div
+                v-if="row.ext.includes('zip')"
+                class="h-8 w-8 rounded-md"
+                @click="viewZip(row)"
+              >
+                <img class="w-full h-full" src="../../assets/zip.png" />
+              </div>
+              <div
                 v-if="videoType.includes(row.ext.toLowerCase())"
                 class="h-8 w-8 rounded-md"
               >
@@ -132,15 +139,22 @@
 <script lang="ts" setup>
 import { inject, ref, watch } from 'vue'
 import dayjs from 'dayjs'
+import JSZip from 'jszip'
 import { cloneDeep } from 'lodash-es'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import api from '../../api'
+import type { JSZipObject } from 'jszip'
 import type { FileItem } from '@/types/file'
 import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
 import PreviewAudio from '@/components/previewAudio/PreviewAudio.vue'
 import PreviewTxt from '@/components/previewTxt/PreviewTxt.vue'
+
+interface ZipItem {
+  name: string
+  children?: ZipItem[]
+}
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -204,6 +218,9 @@ const clickItem = (row: FileItem) => {
   if (row.ext.includes('.document')) {
     viewDocx(row)
   }
+  if (row.ext.includes('zip')) {
+    viewZip(row)
+  }
 }
 
 const viewExcel = async (row: FileItem) => {
@@ -245,6 +262,46 @@ const viewTxt = async (url: string, name: string) => {
     },
   })
   PreviewTxtRef.value?.open(data, name)
+}
+
+const viewZip = async (row: FileItem) => {
+  const { data } = await axios.get(row.url, { responseType: 'arraybuffer' })
+  const zip = await JSZip.loadAsync(data)
+  extractFiles(zip.files)
+}
+
+const extractFiles = (files: { [key: string]: JSZipObject }) => {
+  const zipList: ZipItem[] = []
+  const buildFileTree = (item: JSZipObject) => {
+    const paths = item.name.split('/').filter((item) => Boolean(item))
+    if (paths.length === 1) {
+      zipList.push({
+        name: item.name,
+        children: [],
+      })
+    } else {
+      const parentPath = `${paths.slice(0, -1).join('/')}/`
+      const parent = zipList.find((item) => item.name === parentPath)
+      if (parent) {
+        parent.children?.push({ name: item.name, children: [] })
+        // if (parent.children?.length) {
+        //   for (const child of parent.children) {
+        //     if (!child.item.dir) {
+        //       buildFileTree(child.item)
+        //     }
+        //   }
+        // }
+      }
+    }
+  }
+  const fileNames = Object.keys(files)
+  for (const fileName of fileNames) {
+    const file = files[fileName]
+    if (file) {
+      buildFileTree(file)
+    }
+  }
+  console.log('zipList', zipList)
 }
 
 const confirm = (row: FileItem) => {
