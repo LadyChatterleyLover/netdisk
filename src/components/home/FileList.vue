@@ -61,6 +61,16 @@
                   @click="viewVideo(row.url)"
                 />
               </div>
+              <div
+                v-if="audioType.includes(row.ext.toLowerCase())"
+                class="h-8 w-8 rounded-md"
+              >
+                <img
+                  class="w-full h-full"
+                  src="../../assets/audio.png"
+                  @click="viewAudio(row.url)"
+                />
+              </div>
             </div>
             <div class="flex-1 flex ml-[16px]">
               <div v-if="row.isAdd" class="flex ml-8">
@@ -107,6 +117,7 @@
       </vxe-column>
     </vxe-table>
     <PreviewVideo ref="PreviewVideoRef" />
+    <PreviewAudio ref="PreviewAudioRef" />
   </div>
 </template>
 
@@ -119,9 +130,21 @@ import { useRouter } from 'vue-router'
 import api from '../../api'
 import type { FileItem } from '@/types/file'
 import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
+import PreviewAudio from '@/components/previewAudio/PreviewAudio.vue'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
+const audioType = [
+  'mpeg',
+  'mp3',
+  'wma',
+  'aac',
+  'ogg',
+  'mpc',
+  'flac',
+  'ape',
+  'wv',
+]
 
 const getFileList = inject<() => void>('getFileList')
 
@@ -135,6 +158,7 @@ const emits = defineEmits<{
 const router = useRouter()
 
 const PreviewVideoRef = ref()
+const PreviewAudioRef = ref()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
 
@@ -153,6 +177,9 @@ const formatSize = (size: number) => {
 const clickItem = (row: FileItem) => {
   if (videoType.includes(row.ext)) {
     viewVideo(row.url)
+  }
+  if (audioType.includes(row.ext)) {
+    viewAudio(row.url)
   }
   if (row.ext === 'pdf') {
     viewPdf(row.url)
@@ -191,6 +218,10 @@ const viewPdf = (url: string) => {
 
 const viewVideo = (url: string) => {
   PreviewVideoRef.value?.open(url)
+}
+
+const viewAudio = (url: string) => {
+  PreviewAudioRef.value?.open(url)
 }
 
 const confirm = (row: FileItem) => {
