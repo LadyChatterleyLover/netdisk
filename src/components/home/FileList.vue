@@ -28,16 +28,21 @@
                 v-if="imgType.includes(row.ext.toLowerCase())"
                 class="h-8 w-8 rounded-md"
               >
-                <img
-                  class="w-full h-full"
+                <a-image
+                  lazy
                   :src="getFilePath(row.url, row.ext)"
+                  :preview-mask="false"
                 />
               </div>
               <div
                 v-if="videoType.includes(row.ext.toLowerCase())"
                 class="h-8 w-8 rounded-md"
               >
-                <img class="w-full h-full" src="../../assets/video.png" />
+                <img
+                  class="w-full h-full"
+                  src="../../assets/video.png"
+                  @click="viewVideo(row.url, row.ext)"
+                />
               </div>
             </div>
             <div class="flex-1 flex ml-[16px]">
@@ -84,6 +89,7 @@
         </template>
       </vxe-column>
     </vxe-table>
+    <PreviewVideo ref="PreviewVideoRef" />
   </div>
 </template>
 
@@ -94,6 +100,7 @@ import { cloneDeep } from 'lodash-es'
 import { message } from 'ant-design-vue'
 import api from '../../api'
 import type { FileItem } from '@/types/file'
+import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -107,6 +114,7 @@ const emits = defineEmits<{
   'update:fileList': [val: FileItem[]]
 }>()
 
+const PreviewVideoRef = ref()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
 const host = 'http://localhost:3000'
@@ -129,6 +137,10 @@ const formatSize = (size: number) => {
   } else if (size >= 1024 && size < 1024 * 1024 * 1024 * 1024) {
     return `${(size / 1024 / 1024 / 1024).toFixed(2)}G`
   }
+}
+
+const viewVideo = (url: string, ext: string) => {
+  PreviewVideoRef.value?.open(getFilePath(url, ext))
 }
 
 const confirm = (row: FileItem) => {

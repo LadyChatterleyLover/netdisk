@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex justify-between items-center h-[64px] z-[2000] px-6 relative header"
+    class="flex justify-between items-center h-[64px] z-[10] px-6 relative header"
   >
     <div class="font-bold text-2xl">嘟嘟网盘</div>
     <a-dropdown :trigger="['click']">
