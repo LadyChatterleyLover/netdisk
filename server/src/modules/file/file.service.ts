@@ -24,13 +24,7 @@ export class FileService {
     })
   }
 
-  async upload(
-    name: string,
-    stream: Readable,
-    file: UploadFile,
-    user_id: number,
-    dirId: number,
-  ) {
+  async upload(file: UploadFile, user_id: number, dirId: number) {
     const size = file.size
     const ext = file.mimetype.split('/')[1]
     let filename = decodeURI(escape(file.originalname))
@@ -45,7 +39,7 @@ export class FileService {
         existFiles.length
       }).${ext}`
     }
-    const url = await this.uploadFile(filename, stream)
+    const url = file.path.replace(/\\/g, '/')
     const user = await this.userRepository.findOne({
       where: {
         id: user_id,
@@ -73,17 +67,17 @@ export class FileService {
     }
   }
 
-  async uploadFile(name: string, stream: Readable) {
-    let res
-    try {
-      res = await this.client.putStream(name, stream)
-      // 将文件设置为公共可读
-      await this.client.putACL(name, 'public-read')
-    } catch (error) {
-      console.log(error)
-    }
-    return res.url
-  }
+  // async uploadFile(name: string, stream: Readable) {
+  //   let res
+  //   try {
+  //     res = await this.client.putStream(name, stream)
+  //     // 将文件设置为公共可读
+  //     await this.client.putACL(name, 'public-read')
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  //   return res.url
+  // }
 
   async createDir(name: string, user_id: number) {
     const user = await this.userRepository.findOne({

@@ -4,5 +4,5 @@ export interface UploadFile {
   encoding: string
   mimetype: string
   size: number
-  buffer: Buffer
+  path: string
 }

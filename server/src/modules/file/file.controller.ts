@@ -42,15 +42,7 @@ export class FileController {
     @Body() params: { dirId: number },
     @Req() req,
   ) {
-    const name = file.originalname
-    const stream = bufferToStream(file.buffer)
-    return this.fileService.upload(
-      name,
-      stream,
-      file,
-      req.user.id,
-      params.dirId,
-    )
+    return this.fileService.upload(file, req.user.id, params.dirId)
   }
 
   @Post()

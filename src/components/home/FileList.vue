@@ -28,7 +28,16 @@
                 v-if="imgType.includes(row.ext.toLowerCase())"
                 class="h-8 w-8 rounded-md"
               >
-                <img class="w-full h-full" :src="row.url" />
+                <img
+                  class="w-full h-full"
+                  :src="getFilePath(row.url, row.ext)"
+                />
+              </div>
+              <div
+                v-if="videoType.includes(row.ext.toLowerCase())"
+                class="h-8 w-8 rounded-md"
+              >
+                <img class="w-full h-full" src="../../assets/video.png" />
               </div>
             </div>
             <div class="flex-1 flex ml-[16px]">
@@ -71,7 +80,7 @@
       </vxe-column>
       <vxe-column title="大小" field="size" sortable align="center">
         <template #default="{ row }">
-          {{ row.isDir ? '-' : (row.size / 1024).toFixed(2) + 'KB' }}
+          {{ row.isDir ? '-' : formatSize(row.size) }}
         </template>
       </vxe-column>
     </vxe-table>
@@ -86,7 +95,9 @@ import { message } from 'ant-design-vue'
 import api from '../../api'
 import type { FileItem } from '@/types/file'
 
-const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gi']
+const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
+const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
+
 const getFileList = inject<() => void>('getFileList')
 
 const props = defineProps<{
@@ -98,6 +109,24 @@ const emits = defineEmits<{
 
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
+const host = 'http://localhost:3000'
+
+const getFilePath = (path: string, ext: string) => {
+  const arr = path.split('/')
+  return `${host}/upload/${arr[arr.length - 1].replace(`.${ext}`, '')}.${ext}`
+}
+
+const formatSize = (size: number) => {
+  if (size < 1024) {
+    return `${size.toFixed(2)}B`
+  } else if (size >= 1024 && size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(2)}KB`
+  } else if (size >= 1024 && size < 1024 * 1024 * 1024) {
+    return `${(size / 1024 / 1024).toFixed(2)}M`
+  } else if (size >= 1024 && size < 1024 * 1024 * 1024 * 1024) {
+    return `${(size / 1024 / 1024 / 1024).toFixed(2)}G`
+  }
+}
 
 const confirm = (row: FileItem) => {
   if (!row.name) {
