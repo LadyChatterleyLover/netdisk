@@ -28,20 +28,20 @@
                 v-if="imgType.includes(row.ext.toLowerCase())"
                 class="h-8 w-8 rounded-md"
               >
-                <a-image
-                  lazy
-                  :src="getFilePath(row.url, row.ext)"
-                  :preview-mask="false"
-                />
+                <a-image lazy :src="row.url" :preview-mask="false" />
               </div>
               <div v-if="row.ext === 'pdf'" class="h-8 w-8 rounded-md">
                 <img
                   class="w-full h-full"
                   src="../../assets/pdf.png"
-                  @click="viewPdf(row.url, row.ext)"
+                  @click="viewPdf(row.url)"
                 />
               </div>
-              <div v-if="row.ext.includes('sheet')" class="h-8 w-8 rounded-md">
+              <div
+                v-if="row.ext.includes('sheet')"
+                class="h-8 w-8 rounded-md"
+                @click="viewExcel(row)"
+              >
                 <img class="w-full h-full" src="../../assets/excel.png" />
               </div>
               <div
@@ -51,7 +51,7 @@
                 <img
                   class="w-full h-full"
                   src="../../assets/video.png"
-                  @click="viewVideo(row.url, row.ext)"
+                  @click="viewVideo(row.url)"
                 />
               </div>
             </div>
@@ -108,6 +108,7 @@ import { inject, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { cloneDeep } from 'lodash-es'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
 import api from '../../api'
 import type { FileItem } from '@/types/file'
 import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
@@ -124,18 +125,11 @@ const emits = defineEmits<{
   'update:fileList': [val: FileItem[]]
 }>()
 
+const router = useRouter()
+
 const PreviewVideoRef = ref()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
-const host = 'http://localhost:3000'
-
-const getFilePath = (path: string, ext: string) => {
-  const arr = path.split('/')
-  return `${host}/upload/${arr[arr.length - 1].replace(
-    `.${ext}`,
-    ''
-  )}.${ext}`.replace('.jpeg', '')
-}
 
 const formatSize = (size: number) => {
   if (size < 1024) {
@@ -151,19 +145,32 @@ const formatSize = (size: number) => {
 
 const clickItem = (row: FileItem) => {
   if (videoType.includes(row.ext)) {
-    viewVideo(row.url, row.ext)
+    viewVideo(row.url)
   }
   if (row.ext === 'pdf') {
-    viewPdf(row.url, row.ext)
+    viewPdf(row.url)
+  }
+  if (row.ext.includes('sheet')) {
+    viewExcel(row)
   }
 }
 
-const viewPdf = (url: string, ext: string) => {
-  window.open(getFilePath(url, ext), '_blank')
+const viewExcel = async (row: FileItem) => {
+  const { href } = router.resolve({
+    path: '/previewExcel',
+    query: {
+      excelUrl: row.url,
+    },
+  })
+  window.open(href, '_blank')
 }
 
-const viewVideo = (url: string, ext: string) => {
-  PreviewVideoRef.value?.open(getFilePath(url, ext))
+const viewPdf = (url: string) => {
+  window.open(url)
+}
+
+const viewVideo = (url: string) => {
+  PreviewVideoRef.value?.open(url)
 }
 
 const confirm = (row: FileItem) => {

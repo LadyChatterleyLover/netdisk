@@ -6,6 +6,7 @@ import { Like, Repository } from 'typeorm'
 import { UploadFile } from './dto/file.dto'
 import { User } from '../user/entities/user.entity'
 import { ConfigService } from '@nestjs/config'
+import { Readable } from 'node:stream'
 const dayjs = require('dayjs')
 
 @Injectable()
@@ -24,7 +25,12 @@ export class FileService {
     })
   }
 
-  async upload(files: UploadFile[], user_id: number, dirId: number) {
+  async upload(
+    files: UploadFile[],
+    stream: Readable,
+    user_id: number,
+    dirId: number,
+  ) {
     const file = files[0]
     const size = file.size
     const ext = file.mimetype.split('/')[1]
@@ -39,7 +45,7 @@ export class FileService {
         'YYYYMMDD',
       )}_${dayjs().format('HHmmss')}.${ext}`
     }
-    const url = file.path.replace(/\\/g, '/')
+    const url = await this.uploadFile(filename, stream)
     const user = await this.userRepository.findOne({
       where: {
         id: user_id,
@@ -67,17 +73,17 @@ export class FileService {
     }
   }
 
-  // async uploadFile(name: string, stream: Readable) {
-  //   let res
-  //   try {
-  //     res = await this.client.putStream(name, stream)
-  //     // 将文件设置为公共可读
-  //     await this.client.putACL(name, 'public-read')
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  //   return res.url
-  // }
+  async uploadFile(name: string, stream: Readable) {
+    let res
+    try {
+      res = await this.client.putStream(name, stream)
+      // 将文件设置为公共可读
+      await this.client.putACL(name, 'public-read')
+    } catch (error) {
+      console.log(error)
+    }
+    return res.url
+  }
 
   async createDir(name: string, user_id: number) {
     const user = await this.userRepository.findOne({

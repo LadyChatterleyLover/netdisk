@@ -1,3 +1,5 @@
+import { Stream } from 'node:stream'
+
 export interface UploadFile {
   fieldname: string
   originalname: string
@@ -5,4 +7,5 @@ export interface UploadFile {
   mimetype: string
   size: number
   path: string
+  buffer: Stream
 }

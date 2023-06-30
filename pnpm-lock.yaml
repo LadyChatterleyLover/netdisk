@@ -8,6 +8,9 @@ dependencies:
   '@ant-design/icons-vue':
     specifier: ^6.1.0
     version: 6.1.0(vue@3.3.4)
+  '@vue-office/excel':
+    specifier: ^1.1.7
+    version: 1.1.7(vue-demi@0.13.11)(vue@3.3.4)
   animate.css:
     specifier: ^4.1.1
     version: 4.1.1
@@ -1624,6 +1627,24 @@ packages:
     dependencies:
       '@volar/language-core': 1.7.10
     dev: true
+
+  /@vue-office/excel@1.1.7(vue-demi@0.13.11)(vue@3.3.4):
+    resolution:
+      {
+        integrity: sha512-ulh/cLTRqLWvsZPWokSTTo3cUOzWEbV39eF4yur/B6JM+cpcQIPcgbxYJzfMTueTt2cpRIzZ/a6bXonpmjMxUQ==,
+      }
+    requiresBuild: true
+    peerDependencies:
+      '@vue/composition-api': ^1.7.1
+      vue: ^2.0.0 || >=3.0.0
+      vue-demi: ^0.13.11
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+    dependencies:
+      vue: 3.3.4
+      vue-demi: 0.13.11(vue@3.3.4)
+    dev: false
 
   /@vue/babel-helper-vue-transform-on@1.1.4:
     resolution:
@@ -7293,6 +7314,24 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
+
+  /vue-demi@0.13.11(vue@3.3.4):
+    resolution:
+      {
+        integrity: sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A==,
+      }
+    engines: { node: '>=12' }
+    hasBin: true
+    requiresBuild: true
+    peerDependencies:
+      '@vue/composition-api': ^1.0.0-rc.1
+      vue: ^3.0.0-0 || ^2.6.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+    dependencies:
+      vue: 3.3.4
+    dev: false
 
   /vue-demi@0.14.5(vue@3.3.4):
     resolution:

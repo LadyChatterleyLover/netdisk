@@ -88,6 +88,9 @@ devDependencies:
   '@nestjs/testing':
     specifier: ^9.4.3
     version: 9.4.3(@nestjs/common@9.4.3)(@nestjs/core@9.4.3)(@nestjs/platform-express@9.4.3)
+  '@types/ali-oss':
+    specifier: ^6.16.8
+    version: 6.16.8
   '@types/cache-manager':
     specifier: ^4.0.2
     version: 4.0.2
@@ -1527,6 +1530,13 @@ packages:
       {
         integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==,
       }
+
+  /@types/ali-oss@6.16.8:
+    resolution:
+      {
+        integrity: sha512-OIevBEn5NONhV8pOoPjQ/zZlWgi08+zFaAS7t8wbWm2UIVGJD7nU2u+GnQpjkKcsgOBADMvmr380x/zSx2ythw==,
+      }
+    dev: true
 
   /@types/babel__core@7.20.1:
     resolution:
