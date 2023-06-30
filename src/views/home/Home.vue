@@ -3,6 +3,7 @@
     <a-dropdown>
       <a-upload
         multiple
+        :max-count="10"
         :show-upload-list="false"
         :custom-request="handleCustomRequest"
       >
@@ -18,6 +19,7 @@
           <a-menu-item key="1">
             <a-upload
               multiple
+              :max-count="10"
               :show-upload-list="false"
               :custom-request="handleCustomRequest"
             >
@@ -27,6 +29,7 @@
           <a-menu-item key="2">
             <a-upload
               multiple
+              :max-count="10"
               :show-upload-list="false"
               directory
               :custom-request="handleCustomRequest"

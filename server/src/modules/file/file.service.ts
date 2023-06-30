@@ -24,7 +24,8 @@ export class FileService {
     })
   }
 
-  async upload(file: UploadFile, user_id: number, dirId: number) {
+  async upload(files: UploadFile[], user_id: number, dirId: number) {
+    const file = files[0]
     const size = file.size
     const ext = file.mimetype.split('/')[1]
     let filename = decodeURI(escape(file.originalname))

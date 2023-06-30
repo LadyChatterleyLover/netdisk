@@ -2,14 +2,14 @@ import {
   Controller,
   Post,
   UseInterceptors,
-  UploadedFile,
   UseGuards,
   Req,
   Body,
   Param,
   Patch,
+  UploadedFiles,
 } from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
+import { FilesInterceptor } from '@nestjs/platform-express'
 import { FileService } from './file.service'
 import { Readable } from 'node:stream'
 import { AuthGuard } from '@nestjs/passport'
@@ -36,9 +36,9 @@ export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('file', 10))
   async upload(
-    @UploadedFile() file: UploadFile,
+    @UploadedFiles() file: UploadFile[],
     @Body() params: { dirId: number },
     @Req() req,
   ) {

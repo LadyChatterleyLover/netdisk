@@ -113,7 +113,10 @@ const host = 'http://localhost:3000'
 
 const getFilePath = (path: string, ext: string) => {
   const arr = path.split('/')
-  return `${host}/upload/${arr[arr.length - 1].replace(`.${ext}`, '')}.${ext}`
+  return `${host}/upload/${arr[arr.length - 1].replace(
+    `.${ext}`,
+    ''
+  )}.${ext}`.replace('.jpeg', '')
 }
 
 const formatSize = (size: number) => {
