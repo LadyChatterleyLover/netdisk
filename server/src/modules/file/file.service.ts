@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import * as OSS from 'ali-oss'
+import * as iconv from 'iconv-lite'
 import { InjectRepository } from '@nestjs/typeorm'
 import { File } from './entities/file.entity'
 import { Like, Repository } from 'typeorm'

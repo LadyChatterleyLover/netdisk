@@ -37,6 +37,13 @@
                   @click="viewPdf(row.url)"
                 />
               </div>
+              <div v-if="row.ext === 'plain'" class="h-8 w-8 rounded-md">
+                <img
+                  class="w-full h-full"
+                  src="../../assets/txt.png"
+                  @click="viewTxt(row.url, row.name)"
+                />
+              </div>
               <div
                 v-if="row.ext.includes('.sheet')"
                 class="h-8 w-8 rounded-md"
@@ -118,6 +125,7 @@
     </vxe-table>
     <PreviewVideo ref="PreviewVideoRef" />
     <PreviewAudio ref="PreviewAudioRef" />
+    <PreviewTxt ref="PreviewTxtRef" />
   </div>
 </template>
 
@@ -127,10 +135,12 @@ import dayjs from 'dayjs'
 import { cloneDeep } from 'lodash-es'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import api from '../../api'
 import type { FileItem } from '@/types/file'
 import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
 import PreviewAudio from '@/components/previewAudio/PreviewAudio.vue'
+import PreviewTxt from '@/components/previewTxt/PreviewTxt.vue'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -159,6 +169,7 @@ const router = useRouter()
 
 const PreviewVideoRef = ref()
 const PreviewAudioRef = ref()
+const PreviewTxtRef = ref()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
 
@@ -183,6 +194,9 @@ const clickItem = (row: FileItem) => {
   }
   if (row.ext === 'pdf') {
     viewPdf(row.url)
+  }
+  if (row.ext === 'plain') {
+    viewTxt(row.url, row.name)
   }
   if (row.ext.includes('.sheet')) {
     viewExcel(row)
@@ -222,6 +236,15 @@ const viewVideo = (url: string) => {
 
 const viewAudio = (url: string) => {
   PreviewAudioRef.value?.open(url)
+}
+
+const viewTxt = async (url: string, name: string) => {
+  const { data } = await axios.get(url, {
+    headers: {
+      'Content-Type': 'txt/plain;charset=utf-8',
+    },
+  })
+  PreviewTxtRef.value?.open(data, name)
 }
 
 const confirm = (row: FileItem) => {
