@@ -271,37 +271,31 @@ const viewZip = async (row: FileItem) => {
 }
 
 const extractFiles = (files: { [key: string]: JSZipObject }) => {
-  const zipList: ZipItem[] = []
-  const buildFileTree = (item: JSZipObject) => {
-    const paths = item.name.split('/').filter((item) => Boolean(item))
-    if (paths.length === 1) {
-      zipList.push({
-        name: item.name,
-        children: [],
-      })
-    } else {
-      const parentPath = `${paths.slice(0, -1).join('/')}/`
-      const parent = zipList.find((item) => item.name === parentPath)
-      if (parent) {
-        parent.children?.push({ name: item.name, children: [] })
-        // if (parent.children?.length) {
-        //   for (const child of parent.children) {
-        //     if (!child.item.dir) {
-        //       buildFileTree(child.item)
-        //     }
-        //   }
-        // }
+  const buildFileTree = (paths: string[]) => {
+    const root = { name: '/', children: [] }
+    for (const path of paths) {
+      const parts = path.split('/')
+      let currentNode: any = root
+      for (const part of parts) {
+        let childNode: any = currentNode.children.find(
+          (node: any) => node.name === part
+        )
+        if (!childNode) {
+          const fullPath =
+            currentNode.name === '/'
+              ? `/${part}`
+              : `${currentNode.fullPath}/${part}`
+          childNode = { name: part, fullPath, children: [] }
+          currentNode.children.push(childNode)
+        }
+        currentNode = childNode
       }
     }
+    return root.children
   }
   const fileNames = Object.keys(files)
-  for (const fileName of fileNames) {
-    const file = files[fileName]
-    if (file) {
-      buildFileTree(file)
-    }
-  }
-  console.log('zipList', zipList)
+  const tree = buildFileTree(fileNames)
+  console.log('tree', tree)
 }
 
 const confirm = (row: FileItem) => {
