@@ -34,6 +34,16 @@
                   :preview-mask="false"
                 />
               </div>
+              <div v-if="row.ext === 'pdf'" class="h-8 w-8 rounded-md">
+                <img
+                  class="w-full h-full"
+                  src="../../assets/pdf.png"
+                  @click="viewPdf(row.url, row.ext)"
+                />
+              </div>
+              <div v-if="row.ext.includes('sheet')" class="h-8 w-8 rounded-md">
+                <img class="w-full h-full" src="../../assets/excel.png" />
+              </div>
               <div
                 v-if="videoType.includes(row.ext.toLowerCase())"
                 class="h-8 w-8 rounded-md"
@@ -49,7 +59,7 @@
               <div v-if="row.isAdd" class="flex ml-8">
                 <a-input v-model:value="row.name" size="small" allow-clear />
               </div>
-              <div v-else>{{ row.name }}</div>
+              <div v-else @click="clickItem(row)">{{ row.name }}</div>
             </div>
             <div v-if="row.isAdd" class="flex items-center">
               <div
@@ -137,6 +147,19 @@ const formatSize = (size: number) => {
   } else if (size >= 1024 && size < 1024 * 1024 * 1024 * 1024) {
     return `${(size / 1024 / 1024 / 1024).toFixed(2)}G`
   }
+}
+
+const clickItem = (row: FileItem) => {
+  if (videoType.includes(row.ext)) {
+    viewVideo(row.url, row.ext)
+  }
+  if (row.ext === 'pdf') {
+    viewPdf(row.url, row.ext)
+  }
+}
+
+const viewPdf = (url: string, ext: string) => {
+  window.open(getFilePath(url, ext), '_blank')
 }
 
 const viewVideo = (url: string, ext: string) => {

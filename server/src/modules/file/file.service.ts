@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import * as OSS from 'ali-oss'
-import { Readable } from 'node:stream'
 import { InjectRepository } from '@nestjs/typeorm'
 import { File } from './entities/file.entity'
 import { Like, Repository } from 'typeorm'
 import { UploadFile } from './dto/file.dto'
 import { User } from '../user/entities/user.entity'
 import { ConfigService } from '@nestjs/config'
+const dayjs = require('dayjs')
 
 @Injectable()
 export class FileService {
@@ -29,16 +29,15 @@ export class FileService {
     const size = file.size
     const ext = file.mimetype.split('/')[1]
     let filename = decodeURI(escape(file.originalname))
-    const existFiles = await this.fileRepository
-      .createQueryBuilder('file')
-      .where('file.name LIKE :name', {
-        name: `%${filename.replace(`.${ext}`, '')}%`,
-      })
-      .getMany()
+    const existFiles = await this.fileRepository.find({
+      where: {
+        name: filename,
+      },
+    })
     if (existFiles.length) {
-      filename = `${filename.replace(`.${ext}`, '')}(${
-        existFiles.length
-      }).${ext}`
+      filename = `${filename.replace(`.${ext}`, '')}_${dayjs().format(
+        'YYYYMMDD',
+      )}_${dayjs().format('HHmmss')}.${ext}`
     }
     const url = file.path.replace(/\\/g, '/')
     const user = await this.userRepository.findOne({
