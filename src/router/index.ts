@@ -16,6 +16,11 @@ const router = createRouter({
       component: () => import('@/views/previewExcel/PreviewExcel.vue'),
     },
     {
+      path: '/previewDocx',
+      name: 'previewDocx',
+      component: () => import('@/views/previewDocx/PreviewDocx.vue'),
+    },
+    {
       path: '/',
       component: Layout,
       children: [

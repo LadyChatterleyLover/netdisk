@@ -38,11 +38,18 @@
                 />
               </div>
               <div
-                v-if="row.ext.includes('sheet')"
+                v-if="row.ext.includes('.sheet')"
                 class="h-8 w-8 rounded-md"
                 @click="viewExcel(row)"
               >
                 <img class="w-full h-full" src="../../assets/excel.png" />
+              </div>
+              <div
+                v-if="row.ext.includes('.document')"
+                class="h-8 w-8 rounded-md"
+                @click="viewDocx(row)"
+              >
+                <img class="w-full h-full" src="../../assets/docx.png" />
               </div>
               <div
                 v-if="videoType.includes(row.ext.toLowerCase())"
@@ -150,14 +157,27 @@ const clickItem = (row: FileItem) => {
   if (row.ext === 'pdf') {
     viewPdf(row.url)
   }
-  if (row.ext.includes('sheet')) {
+  if (row.ext.includes('.sheet')) {
     viewExcel(row)
+  }
+  if (row.ext.includes('.document')) {
+    viewDocx(row)
   }
 }
 
 const viewExcel = async (row: FileItem) => {
   const { href } = router.resolve({
     path: '/previewExcel',
+    query: {
+      excelUrl: row.url,
+    },
+  })
+  window.open(href, '_blank')
+}
+
+const viewDocx = async (row: FileItem) => {
+  const { href } = router.resolve({
+    path: '/previewDocx',
     query: {
       excelUrl: row.url,
     },
