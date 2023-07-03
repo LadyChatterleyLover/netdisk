@@ -61,7 +61,7 @@
   </div>
   <div class="font-bold text-sm my-5">全部文件</div>
   <a-spin :spinning="loading" tip="上传中...">
-    <FileList v-model:file-list="fileList" />
+    <FileList ref="fileListRef" v-model:file-list="fileList" />
   </a-spin>
 </template>
 
@@ -78,6 +78,7 @@ const route = useRoute()
 const fileStore = useFileStore()
 const fileList = computed(() => fileStore.fileList)
 
+const fileListRef = ref()
 const category = ref('')
 const loading = ref(false)
 
@@ -124,6 +125,7 @@ const addDir = () => {
     url: '',
     isAdd: true,
   })
+  fileListRef.value?.setInputFocus()
 }
 
 provide('getFileList', getFileList)

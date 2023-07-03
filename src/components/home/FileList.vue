@@ -88,7 +88,13 @@
             </div>
             <div class="flex-1 flex ml-[16px]">
               <div v-if="row.isAdd" class="flex ml-8">
-                <a-input v-model:value="row.name" size="small" allow-clear />
+                <a-input
+                  ref="inputRef"
+                  v-model:value="row.name"
+                  size="small"
+                  allow-clear
+                  @press-enter="confirm(row)"
+                />
               </div>
               <div v-else @click="clickItem(row)">{{ row.name }}</div>
             </div>
@@ -170,7 +176,7 @@
 </template>
 
 <script lang="ts" setup>
-import { createVNode, inject, ref, watch } from 'vue'
+import { createVNode, inject, nextTick, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { cloneDeep } from 'lodash-es'
 import { Modal, message } from 'ant-design-vue'
@@ -216,6 +222,7 @@ const PreviewVideoRef = ref()
 const PreviewAudioRef = ref()
 const PreviewTxtRef = ref()
 const PreviewZipRef = ref()
+const inputRef = ref<HTMLInputElement>()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
 
@@ -348,6 +355,12 @@ const cancel = () => {
   emits('update:fileList', tableData.value)
 }
 
+const setInputFocus = () => {
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
 watch(
   () => props.fileList,
   (val) => {
@@ -355,6 +368,10 @@ watch(
   },
   { deep: true, immediate: true }
 )
+
+defineExpose({
+  setInputFocus,
+})
 </script>
 
 <style scoped lang="scss">
