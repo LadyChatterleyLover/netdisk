@@ -150,11 +150,12 @@
           </div>
         </template>
       </vxe-column>
-      <vxe-column title="修改时间" sortable>
-        <template #default="{ row }">
-          {{ dayjs(row.updateAt).format('YYYY-MM-DD HH:mm:ss') }}
-        </template>
-      </vxe-column>
+      <vxe-column
+        title="修改时间"
+        field="updateAt"
+        :formatter="formatterTime"
+        sortable
+      />
       <vxe-column title="大小" field="size" sortable>
         <template #default="{ row }">
           {{ row.isDir ? '-' : useFormatFileSize(row.size) }}
@@ -177,6 +178,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import api from '../../api'
+import type { VxeColumnPropTypes } from 'vxe-table'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
 import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
@@ -216,6 +218,12 @@ const PreviewTxtRef = ref()
 const PreviewZipRef = ref()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
+
+const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
+  cellValue,
+}) => {
+  return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
+}
 
 const clickItem = (row: FileItem) => {
   if (videoType.includes(row.ext)) {

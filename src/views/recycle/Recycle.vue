@@ -102,11 +102,13 @@
           </div>
         </template>
       </vxe-column>
-      <vxe-column title="删除时间" sortable align="center">
-        <template #default="{ row }">
-          {{ dayjs(row.deleteAt).format('YYYY-MM-DD HH:mm:ss') }}
-        </template>
-      </vxe-column>
+      <vxe-column
+        title="删除时间"
+        field="deleteAt"
+        :formatter="formatterTime"
+        sortable
+        align="center"
+      />
       <vxe-column title="大小" field="size" sortable align="center">
         <template #default="{ row }">
           {{ row.isDir ? '-' : useFormatFileSize(row.size) }}
@@ -140,7 +142,7 @@ import dayjs from 'dayjs'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import api from '../../api'
-import type { VxeTableInstance } from 'vxe-table'
+import type { VxeColumnPropTypes, VxeTableInstance } from 'vxe-table'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
 
@@ -163,6 +165,12 @@ const selectList = ref<number[]>([])
 const checkAll = ref(false)
 const indeterminate = ref(false)
 const tableRef = ref<VxeTableInstance<FileItem>>()
+
+const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
+  cellValue,
+}) => {
+  return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
+}
 
 const getFileList = () => {
   api.file
