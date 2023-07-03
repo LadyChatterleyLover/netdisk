@@ -29,6 +29,11 @@ const router = createRouter({
           name: 'home',
           component: () => import('@/views/home/Home.vue'),
         },
+        {
+          path: '/recycle',
+          name: 'recycle',
+          component: () => import('@/views/recycle/Recycle.vue'),
+        },
       ],
     },
   ],

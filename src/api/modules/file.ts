@@ -5,7 +5,13 @@ export default {
   uploadFile(params: any) {
     return post<FileItem>('/file/upload', params, false, true)
   },
-  getFileList(params?: { name?: string; type?: string; dirId?: number }) {
+  getFileList(params?: {
+    name?: string
+    type?: string
+    dirId?: number
+    isDir?: boolean
+    isRecovery?: boolean
+  }) {
     return post<FileItem[]>('/file', params, true)
   },
   createDir(params: { name: string }) {

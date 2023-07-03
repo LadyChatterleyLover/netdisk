@@ -25,11 +25,11 @@ export class File {
   @Column({ default: '' })
   url: string
 
-  @Column({ default: false })
-  isDir: boolean
+  @Column({ default: 0 })
+  isDir: number
 
-  @Column({ default: false })
-  isRecovery: boolean
+  @Column({ default: 0 })
+  isRecovery: number
 
   @Column({ default: null })
   dirId: number
@@ -40,7 +40,7 @@ export class File {
   @Column({ default: 0 })
   size: number
 
-  @Column()
+  @Column({ default: '' })
   deleteAt: string
 
   @CreateDateColumn()

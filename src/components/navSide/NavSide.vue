@@ -8,15 +8,15 @@
         v-for="(item, index) in menuList"
         :key="index"
         class="flex flex-col items-center w-full h-[60px] mb-4 cursor-pointer"
-        :class="{ active: activeIndex === index }"
-        @click="activeIndex = index"
+        :class="{ active: activeIndex === item.path }"
+        @click="clickItem(item)"
       >
         <div class="mb-2">
           <component :is="item.icon" class="text-xl" />
         </div>
         <div
           class="text-[#636d7e] text-sm"
-          :class="{ active: activeIndex === index }"
+          :class="{ active: activeIndex === item.path }"
         >
           {{ item.name }}
         </div>
@@ -26,40 +26,53 @@
       class="w-[200px] py-8 flex flex-col items-center"
       style="border-right: 1px solid #eee"
     >
-      <HomeSide v-if="activeIndex === 0" />
+      <HomeSide v-if="activeIndex === '/' || activeIndex === '/recycle'" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import HomeSide from './HomeSide.vue'
 
 interface MenuItem {
   name: string
   icon: string
+  path: string
 }
 
-const activeIndex = ref(0)
+const route = useRoute()
+const router = useRouter()
+const activeIndex = ref(route.path)
 
 const menuList: MenuItem[] = [
   {
     name: '首页',
     icon: 'home-outlined',
+    path: '/',
   },
   {
     name: '分享',
     icon: 'file-outlined',
+    path: '/share',
   },
   {
     name: '回收站',
     icon: 'delete-outlined',
+    path: '/recycle',
   },
   {
     name: '设置',
     icon: 'setting-outlined',
+    path: '/setting',
   },
 ]
+
+const clickItem = (item: MenuItem) => {
+  activeIndex.value = item.path
+  router.push(item.path)
+}
 </script>
 
 <style scoped lang="scss">

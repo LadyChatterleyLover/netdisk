@@ -126,7 +126,7 @@ export class FileService {
     const existDir = await this.fileRepository.findOne({
       where: {
         name,
-        isDir: true,
+        isDir: 1,
       },
     })
     if (existDir) {
@@ -137,7 +137,7 @@ export class FileService {
     }
     const data = await this.fileRepository.save({
       name,
-      isDir: true,
+      isDir: 1,
       user,
     })
     if (data) {
@@ -166,7 +166,6 @@ export class FileService {
       .createQueryBuilder('file')
       .leftJoinAndSelect('file.user', 'user')
       .where('user.id = :userId', { userId })
-      .andWhere({ isRecovery: false })
     if (name) {
       query.andWhere('file.name LIKE :name', { name: `%${name}%` })
     }
@@ -177,11 +176,14 @@ export class FileService {
       query.andWhere('file.dirId = :dirId', { dirId })
     }
     if (isDir) {
-      query.andWhere('file.isDir = :isDir', { isDir })
+      query.andWhere({ isDir: 1 })
     }
     if (isRecovery) {
-      query.andWhere('file.isRecovery = :isRecovery', { isRecovery })
+      query.andWhere({ isRecovery: 1 })
+    } else {
+      query.andWhere({ isRecovery: 0 })
     }
+
     query.orderBy('file.isDir', 'DESC')
     const data = await query.getMany()
     return {
@@ -243,8 +245,8 @@ export class FileService {
       .createQueryBuilder('file')
       .update()
       .set({
-        isRecovery: true,
-        deleteAt: String(Date.now()),
+        isRecovery: 1,
+        deleteAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       })
       .whereInIds(fileIds)
       .execute()

@@ -54,6 +54,7 @@ export class FileController {
       type: string
       dirId: number
       isDir: boolean
+      isRecovery: boolean
     },
     @Req() req,
   ) {
@@ -63,6 +64,7 @@ export class FileController {
       params.type,
       params.dirId,
       params.isDir,
+      params.isRecovery,
     )
   }
 
