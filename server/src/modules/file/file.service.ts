@@ -154,19 +154,38 @@ export class FileService {
     }
   }
 
-  async findAll(name = '', type = '', dirId: number, isDir?: boolean) {
-    const data = await this.fileRepository.find({
+  async findAll(
+    userId: number,
+    name = '',
+    type = '',
+    dirId: number,
+    isDir?: boolean,
+  ) {
+    const user = await this.userRepository.findOne({
       where: {
-        name: Like(`%${name}%`),
-        dirId,
-        type: Like(`%${type}%`),
-        isDir,
+        id: userId,
       },
-      order: {
-        isDir: 'DESC',
-      },
-      relations: ['user'],
     })
+
+    const query = this.fileRepository
+      .createQueryBuilder('file')
+      .leftJoinAndSelect('file.user', 'user')
+      .where('user.id = :userId', { userId })
+    // .andWhere('file.isDir = :isDir', {isDir})
+    if (name) {
+      query.andWhere('file.name LIKE :name', { name: `%${name}%` })
+    }
+    if (type) {
+      query.andWhere('file.type LIKE :type', { type: `%${type}%` })
+    }
+    if (dirId) {
+      query.andWhere('file.dirId = :dirId', { dirId })
+    }
+    if (isDir) {
+      query.andWhere('file.isDir = :isDir', { isDir })
+    }
+    query.orderBy('file.isDir', 'DESC')
+    const data = await query.getMany()
     return {
       code: 200,
       msg: '查询成功',

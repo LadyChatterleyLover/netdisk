@@ -55,8 +55,10 @@ export class FileController {
       dirId: number
       isDir: boolean
     },
+    @Req() req,
   ) {
     return this.fileService.findAll(
+      req.user.id,
       params.name,
       params.type,
       params.dirId,
