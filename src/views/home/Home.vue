@@ -66,19 +66,20 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { type UploadProps, message } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import type { FileItem } from '@/types/file'
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
+import { useFileStore } from '@/stores/file'
 
 const route = useRoute()
-const category = ref('')
+const fileStore = useFileStore()
+const fileList = computed(() => fileStore.fileList)
 
+const category = ref('')
 const loading = ref(false)
-const fileList = ref<FileItem[]>([])
 
 const getFileList = () => {
   api.file.getFileList().then((res) => {
@@ -86,7 +87,7 @@ const getFileList = () => {
       item.checked = false
       item.isAdd = false
     })
-    fileList.value = res.data
+    fileStore.setFileList(res.data)
   })
 }
 

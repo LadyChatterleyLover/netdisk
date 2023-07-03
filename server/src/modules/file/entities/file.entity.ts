@@ -20,6 +20,9 @@ export class File {
   ext: string
 
   @Column({ default: '' })
+  type: string
+
+  @Column({ default: '' })
   url: string
 
   @Column({ default: false })

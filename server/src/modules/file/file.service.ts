@@ -10,6 +10,20 @@ import { ConfigService } from '@nestjs/config'
 import { Readable } from 'node:stream'
 const dayjs = require('dayjs')
 
+const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
+const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
+const audioType = [
+  'mpeg',
+  'mp3',
+  'wma',
+  'aac',
+  'ogg',
+  'mpc',
+  'flac',
+  'ape',
+  'wv',
+]
+
 @Injectable()
 export class FileService {
   public client
@@ -35,7 +49,23 @@ export class FileService {
     const file = files[0]
     const size = file.size
     const ext = file.mimetype.split('/')[1]
+    let type = ''
     let filename = decodeURI(escape(file.originalname))
+    if (imgType.includes(ext.toLowerCase())) {
+      type = 'image'
+    } else if (videoType.includes(ext.toLowerCase())) {
+      type = 'video'
+    } else if (audioType.includes(ext.toLowerCase())) {
+      type = 'audio'
+    } else if (
+      ext === 'pdf' ||
+      ext.includes('.sheet') ||
+      ext.includes('.document')
+    ) {
+      type = 'text'
+    } else {
+      type = 'other'
+    }
     const existFiles = await this.fileRepository.find({
       where: {
         name: filename,
@@ -59,6 +89,7 @@ export class FileService {
       url,
       user,
       dirId,
+      type,
     })
     if (res) {
       return {
@@ -123,11 +154,13 @@ export class FileService {
     }
   }
 
-  async findAll(name = '', dirId: number) {
+  async findAll(name = '', type = '', dirId: number, isDir?: boolean) {
     const data = await this.fileRepository.find({
       where: {
         name: Like(`%${name}%`),
         dirId,
+        type: Like(`%${type}%`),
+        isDir,
       },
       order: {
         isDir: 'DESC',

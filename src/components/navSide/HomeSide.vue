@@ -3,7 +3,7 @@
     <div
       class="w-full h-10 flex justify-around items-center cursor-pointer"
       :class="{ active: activeIndex === 0 }"
-      @click="clickItem('all', 0)"
+      @click="clickItem('', 0)"
     >
       <div class="flex">
         <div>
@@ -19,7 +19,7 @@
       <div
         v-for="(item, index) in menuList"
         :key="index"
-        class="w-full h-10 flex pl-[50px] items-center mt-5 cursor-pointer"
+        class="w-full h-[30px] flex pl-[50px] items-center mt-5 cursor-pointer"
         :class="{ active: activeIndex === index + 1 }"
         @click="clickItem(item.type, index + 1)"
       >
@@ -34,12 +34,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import api from '@/api'
+import { useFileStore } from '@/stores/file'
 
 interface MenuItem {
   name: string
   icon: string
   type: string
 }
+
+const fileStore = useFileStore()
 
 const menuList: MenuItem[] = [
   {
@@ -50,7 +54,7 @@ const menuList: MenuItem[] = [
   {
     name: '文档',
     icon: 'file-outlined',
-    type: 'file',
+    type: 'text',
   },
   {
     name: '视频',
@@ -70,11 +74,18 @@ const menuList: MenuItem[] = [
 ]
 
 const activeIndex = ref(0)
-const category = ref('all')
+const category = ref('')
 
 const clickItem = (type: string, index: number) => {
   category.value = type
   activeIndex.value = index
+  api.file
+    .getFileList({
+      type,
+    })
+    .then((res) => {
+      fileStore.setFileList(res.data)
+    })
 }
 </script>
 
