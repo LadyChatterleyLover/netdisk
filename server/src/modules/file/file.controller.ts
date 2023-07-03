@@ -83,6 +83,11 @@ export class FileController {
     return this.fileService.recoveryFile(ids)
   }
 
+  @Post('reductionFile')
+  async reductionFile(@Body() ids: number[]) {
+    return this.fileService.reductionFile(ids)
+  }
+
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateFileDto) {
     return this.fileService.updateFile(+id, updateFileDto)

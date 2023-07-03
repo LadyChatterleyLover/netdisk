@@ -23,6 +23,9 @@ export default {
   recoveryFile(ids: number[]) {
     return post('/file/recoveryFile', ids, true)
   },
+  reductionFile(ids: number[]) {
+    return post('/file/reductionFile', ids, true)
+  },
   updateFile(id: number, params: any) {
     return post(`/file/${id}`, params, true)
   },

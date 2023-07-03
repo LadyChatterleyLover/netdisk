@@ -1,19 +1,54 @@
 <template>
+  <a-button type="primary" shape="round" @click="clear">清空回收站</a-button>
+  <div class="font-bold mt-3">回收站</div>
   <div class="mt-8 file-list-table">
-    <vxe-table :data="tableData">
+    <vxe-table ref="tableRef" :data="tableData">
       <vxe-column title="文件名">
         <template #header="{ column }">
           <div class="flex">
             <div class="ml-2">
-              <a-checkbox v-model:checked="checkAll" />
+              <a-checkbox
+                v-model:checked="checkAll"
+                :indeterminate="indeterminate"
+                @change="selectAll"
+              />
             </div>
-            <div class="ml-5">{{ column.title }}</div>
+            <div v-if="selectList.length" class="flex">
+              <div class="mx-3 text-[#818999] text-xs relative top-[2px]">
+                已选中{{ selectList.length }}个文件/文件夹
+              </div>
+              <div class="flex">
+                <redo-outlined
+                  style="
+                    color: #1890ff;
+                    margin-right: 2px;
+                    transform: rotate(180deg);
+                    position: relative;
+                    top: -13px;
+                  "
+                />
+                <a-button
+                  type="link"
+                  style="padding: 0"
+                  class="mr-3 relative top-[-5px]"
+                  @click="reductionFile"
+                  >还原</a-button
+                >
+              </div>
+            </div>
+            <div v-else class="ml-5">{{ column.title }}</div>
           </div>
         </template>
         <template #default="{ row }">
           <div class="flex items-center file-item cursor-pointer">
-            <div class="mx-2 invisible check-item">
-              <a-checkbox v-model:checked="row.checked" />
+            <div
+              class="mx-2 invisible check-item"
+              :style="{ visibility: row.checked ? 'visible' : 'hidden' }"
+            >
+              <a-checkbox
+                v-model:checked="row.checked"
+                @change="changeRow(row)"
+              />
             </div>
             <div class="w-8 flex ml-3">
               <img
@@ -82,7 +117,13 @@
           <redo-outlined
             style="color: #1890ff; margin-right: 2px; transform: rotate(180deg)"
           />
-          <a-button type="link" style="padding: 0" class="mr-3">还原</a-button>
+          <a-button
+            type="link"
+            style="padding: 0"
+            class="mr-3"
+            @click="reductionFile(row)"
+            >还原</a-button
+          >
           <delete-outlined style="color: #ff4d4f; margin-right: 2px" />
           <a-button type="text" danger style="padding: 0" @click="delFile(row)"
             >删除</a-button
@@ -94,11 +135,12 @@
 </template>
 
 <script lang="ts" setup>
-import { createVNode, onMounted, ref } from 'vue'
+import { createVNode, onMounted, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import api from '../../api'
+import type { VxeTableInstance } from 'vxe-table'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
 
@@ -117,7 +159,10 @@ const audioType = [
 ]
 
 const tableData = ref<FileItem[]>([])
+const selectList = ref<number[]>([])
 const checkAll = ref(false)
+const indeterminate = ref(false)
+const tableRef = ref<VxeTableInstance<FileItem>>()
 
 const getFileList = () => {
   api.file
@@ -127,6 +172,72 @@ const getFileList = () => {
     .then((res) => {
       tableData.value = res.data
     })
+}
+
+const selectAll = () => {
+  indeterminate.value = false
+  if (checkAll.value) {
+    selectList.value = tableData.value.map((item) => item.id)
+    tableData.value.forEach((item) => {
+      item.checked = true
+    })
+  } else {
+    selectList.value = []
+    tableData.value.forEach((item) => {
+      item.checked = false
+    })
+  }
+}
+
+const changeRow = (row: FileItem) => {
+  if (row.checked) {
+    selectList.value.push(row.id)
+  } else {
+    selectList.value = selectList.value.filter((item) => item !== row.id)
+  }
+}
+
+const clear = () => {
+  Modal.confirm({
+    icon: createVNode(ExclamationCircleOutlined),
+    content: '确认清空回收站吗？',
+    okText: '删除',
+    width: '500px',
+    onOk() {
+      const ids = tableData.value.map((item) => item.id)
+      api.file.deleteFile(ids).then((res) => {
+        if (res.code === 200) {
+          message.success(res.msg)
+          getFileList?.()
+        } else {
+          message.error(res.msg)
+        }
+      })
+    },
+  })
+}
+
+const reductionFile = (row?: FileItem) => {
+  const ids: number[] = []
+  if (row.id) {
+    ids.push(row.id)
+  }
+  Modal.confirm({
+    icon: createVNode(ExclamationCircleOutlined),
+    content: '确认还原选中的文件？',
+    onOk() {
+      api.file.reductionFile(row.id ? ids : selectList.value).then((res) => {
+        if (res.code === 200) {
+          message.success(res.msg)
+          getFileList()
+          selectList.value = []
+          checkAll.value = false
+        } else {
+          message.error(res.msg)
+        }
+      })
+    },
+  })
 }
 
 const delFile = (row: FileItem) => {
@@ -148,6 +259,15 @@ const delFile = (row: FileItem) => {
   })
 }
 
+watch(
+  () => selectList.value,
+  (val) => {
+    indeterminate.value = !!val.length && val.length < tableData.value.length
+    checkAll.value = val.length === tableData.value.length
+  },
+  { deep: true }
+)
+
 onMounted(() => {
   getFileList()
 })
@@ -157,10 +277,10 @@ onMounted(() => {
 .file-item {
   &:hover {
     .check-item {
-      visibility: visible;
+      visibility: visible !important;
     }
     .action {
-      display: flex;
+      display: flex !important;
     }
   }
 }

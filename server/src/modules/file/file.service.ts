@@ -262,4 +262,26 @@ export class FileService {
       }
     }
   }
+
+  async reductionFile(fileIds: number[]) {
+    const res = await this.fileRepository
+      .createQueryBuilder('file')
+      .update()
+      .set({
+        isRecovery: 0,
+      })
+      .whereInIds(fileIds)
+      .execute()
+    if (res) {
+      return {
+        code: 200,
+        msg: '还原成功',
+      }
+    } else {
+      return {
+        code: 500,
+        msg: '还原成功',
+      }
+    }
+  }
 }
