@@ -40,6 +40,9 @@ export class File {
   @Column({ default: 0 })
   size: number
 
+  @Column()
+  deleteAt: string
+
   @CreateDateColumn()
   createAt: Date
 

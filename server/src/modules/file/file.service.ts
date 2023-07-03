@@ -160,13 +160,8 @@ export class FileService {
     type = '',
     dirId: number,
     isDir?: boolean,
+    isRecovery?: boolean,
   ) {
-    const user = await this.userRepository.findOne({
-      where: {
-        id: userId,
-      },
-    })
-
     const query = this.fileRepository
       .createQueryBuilder('file')
       .leftJoinAndSelect('file.user', 'user')
@@ -183,6 +178,9 @@ export class FileService {
     }
     if (isDir) {
       query.andWhere('file.isDir = :isDir', { isDir })
+    }
+    if (isRecovery) {
+      query.andWhere('file.isRecovery = :isRecovery', { isRecovery })
     }
     query.orderBy('file.isDir', 'DESC')
     const data = await query.getMany()
@@ -246,6 +244,7 @@ export class FileService {
       .update()
       .set({
         isRecovery: true,
+        deleteAt: String(Date.now()),
       })
       .whereInIds(fileIds)
       .execute()
