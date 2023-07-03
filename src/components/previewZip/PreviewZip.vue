@@ -8,8 +8,39 @@
       overflow: 'auto',
       height: '700px',
     }"
-    width="35%"
+    width="30%"
+    @cancel="close"
   >
+    <div
+      class="text-[#afb3bf] bg-[#fafafc] flex items-center h-10 rounded pr-[14px] pl-6 mt-3 mb-5"
+    >
+      <a-breadcrumb separator="">
+        <template v-if="breadcrumbPaths.length">
+          <a-breadcrumb-item class="active">
+            <span @click="back">返回上一级</span>
+          </a-breadcrumb-item>
+          <a-breadcrumb-separator>|</a-breadcrumb-separator>
+        </template>
+        <a-breadcrumb-item
+          :class="{ active: breadcrumbPaths.length }"
+          @click="clickAll"
+          >全部文件</a-breadcrumb-item
+        >
+        <a-breadcrumb-separator v-if="breadcrumbPaths.length"
+          >&gt;</a-breadcrumb-separator
+        >
+        <template v-for="(item, index) in breadcrumbPaths" :key="index">
+          <a-breadcrumb-item
+            :class="{ active: item.children && item.children.length }"
+          >
+            <span @click="clickBreadcrumb(item, index)">{{ item.name }}</span>
+          </a-breadcrumb-item>
+          <a-breadcrumb-separator v-if="index !== breadcrumbPaths.length - 1"
+            >&gt;</a-breadcrumb-separator
+          >
+        </template>
+      </a-breadcrumb>
+    </div>
     <vxe-table :data="fileList">
       <vxe-column title="文件名" align="center">
         <template #default="{ row }">
@@ -50,6 +81,7 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import JSZip from 'jszip'
+import { cloneDeep } from 'lodash-es'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
 
@@ -62,6 +94,8 @@ interface ZipItem {
 const visible = ref(false)
 const current = ref<FileItem>()
 const fileList = ref<ZipItem[]>([])
+const cloneFileList = ref<ZipItem[]>([])
+const breadcrumbPaths = ref<ZipItem[]>([])
 
 const extractFiles = (zipFile: any) => {
   const buildFileTree = (files: any) => {
@@ -114,7 +148,29 @@ const setSize = async (zip: any, fileNames: string[]) => {
 
 const clickItem = (row: ZipItem) => {
   if (row.children && row.children.length) {
-    fileList.value = row.children
+    fileList.value = cloneDeep(row.children)
+    breadcrumbPaths.value.push(row)
+  }
+}
+
+const clickBreadcrumb = (row: ZipItem, index: number) => {
+  if (row.children && row.children.length) {
+    fileList.value = cloneDeep(row.children)
+    breadcrumbPaths.value = breadcrumbPaths.value.slice(0, index + 1)
+  }
+}
+
+const clickAll = () => {
+  if (breadcrumbPaths.value.length) {
+    fileList.value = cloneFileList.value
+    breadcrumbPaths.value = []
+  }
+}
+
+const back = () => {
+  if (breadcrumbPaths.value.length === 1) {
+    breadcrumbPaths.value = []
+    fileList.value = cloneFileList.value
   }
 }
 
@@ -124,8 +180,16 @@ const open = async (row: FileItem) => {
   const zip = await JSZip.loadAsync(data)
   const fileNames = Object.keys(zip.files)
   await setSize(zip, fileNames)
-  fileList.value = extractFiles(zip.files)
+  fileList.value = cloneDeep(extractFiles(zip.files))
+  cloneFileList.value = cloneDeep(extractFiles(zip.files))
   visible.value = true
+}
+
+const close = () => {
+  current.value = undefined
+  fileList.value = []
+  cloneFileList.value = []
+  breadcrumbPaths.value = []
 }
 
 defineExpose({
@@ -133,4 +197,9 @@ defineExpose({
 })
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.active {
+  color: #06a7ff;
+  cursor: pointer;
+}
+</style>
