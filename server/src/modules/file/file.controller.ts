@@ -72,8 +72,13 @@ export class FileController {
   }
 
   @Post('patchDelete')
-  async patchDelete(@Body() params: { ids: number[] }) {
-    return this.fileService.patchDelete(params.ids)
+  async patchDelete(@Body() ids: number[]) {
+    return this.fileService.patchDelete(ids)
+  }
+
+  @Post('recoveryFile')
+  async recoveryFile(@Body() ids: number[]) {
+    return this.fileService.recoveryFile(ids)
   }
 
   @Patch(':id')

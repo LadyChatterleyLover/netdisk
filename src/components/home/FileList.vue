@@ -107,24 +107,55 @@
               </div>
             </div>
             <div v-if="!row.isAdd" class="hidden action">
-              <share-alt-outlined class="mr-3 text-sm" style="color: #06a7ff" />
-              <download-outlined class="mr-3 text-sm" style="color: #06a7ff" />
-              <delete-outlined class="mr-3 text-sm" style="color: #06a7ff" />
-              <column-height-outlined
-                class="mr-3 text-sm"
-                style="color: #06a7ff"
-              />
-              <ellipsis-outlined class="mr-3 text-sm" style="color: #06a7ff" />
+              <a-tooltip title="分享" placement="bottom">
+                <share-alt-outlined
+                  class="mr-3 text-sm"
+                  style="color: #06a7ff"
+                />
+              </a-tooltip>
+              <a-tooltip title="下载" placement="bottom">
+                <download-outlined
+                  class="mr-3 text-sm"
+                  style="color: #06a7ff"
+                  @click="downloadFile(row.url)"
+                />
+              </a-tooltip>
+              <a-tooltip title="删除" placement="bottom">
+                <delete-outlined
+                  class="mr-3 text-sm"
+                  style="color: #06a7ff"
+                  @click="delFile(row)"
+                />
+              </a-tooltip>
+              <a-dropdown>
+                <ellipsis-outlined
+                  class="mr-3 text-sm"
+                  style="color: #06a7ff"
+                />
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item key="1">
+                      <span>重命名</span>
+                    </a-menu-item>
+                    <a-menu-item key="2">
+                      <span>复制</span>
+                    </a-menu-item>
+                    <a-menu-item key="3">
+                      <span>移动</span>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
             </div>
           </div>
         </template>
       </vxe-column>
-      <vxe-column title="修改时间" sortable align="center">
+      <vxe-column title="修改时间" sortable>
         <template #default="{ row }">
           {{ dayjs(row.updateAt).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
       </vxe-column>
-      <vxe-column title="大小" field="size" sortable align="center">
+      <vxe-column title="大小" field="size" sortable>
         <template #default="{ row }">
           {{ row.isDir ? '-' : useFormatFileSize(row.size) }}
         </template>
@@ -138,12 +169,13 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref, watch } from 'vue'
+import { createVNode, inject, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { cloneDeep } from 'lodash-es'
-import { message } from 'ant-design-vue'
+import { Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import api from '../../api'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
@@ -151,6 +183,7 @@ import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
 import PreviewAudio from '@/components/previewAudio/PreviewAudio.vue'
 import PreviewTxt from '@/components/previewTxt/PreviewTxt.vue'
 import PreviewZip from '@/components/previewZip/PreviewZip.vue'
+import { download } from '@/utils/util'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -251,6 +284,35 @@ const viewTxt = async (url: string, name: string) => {
 
 const viewZip = async (row: FileItem) => {
   PreviewZipRef.value?.open(row)
+}
+
+const downloadFile = (url: string) => {
+  download(url)
+}
+
+const delFile = (row: FileItem) => {
+  Modal.confirm({
+    icon: createVNode(ExclamationCircleOutlined),
+    content: createVNode('div', { style: { fontSize: '16px' } }, [
+      '确定删除所选的文件吗？',
+      createVNode(
+        'div',
+        { style: { color: '#ca963b', marginLeft: '38px', marginTop: '10px' } },
+        '删除的文件可在回收站查看'
+      ),
+    ]),
+    okText: '删除',
+    onOk() {
+      api.file.recoveryFile([row.id!]).then((res) => {
+        if (res.code === 200) {
+          message.success(res.msg)
+          getFileList?.()
+        } else {
+          message.error(res.msg)
+        }
+      })
+    },
+  })
 }
 
 const confirm = (row: FileItem) => {

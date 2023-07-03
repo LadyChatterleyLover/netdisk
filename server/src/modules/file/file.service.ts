@@ -171,7 +171,7 @@ export class FileService {
       .createQueryBuilder('file')
       .leftJoinAndSelect('file.user', 'user')
       .where('user.id = :userId', { userId })
-    // .andWhere('file.isDir = :isDir', {isDir})
+      .andWhere({ isRecovery: false })
     if (name) {
       query.andWhere('file.name LIKE :name', { name: `%${name}%` })
     }
@@ -236,6 +236,28 @@ export class FileService {
       return {
         code: 500,
         msg: '修改失败',
+      }
+    }
+  }
+
+  async recoveryFile(fileIds: number[]) {
+    const res = await this.fileRepository
+      .createQueryBuilder('file')
+      .update()
+      .set({
+        isRecovery: true,
+      })
+      .whereInIds(fileIds)
+      .execute()
+    if (res) {
+      return {
+        code: 200,
+        msg: '删除成功',
+      }
+    } else {
+      return {
+        code: 500,
+        msg: '删除失败',
       }
     }
   }

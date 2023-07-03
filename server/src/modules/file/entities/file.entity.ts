@@ -28,6 +28,9 @@ export class File {
   @Column({ default: false })
   isDir: boolean
 
+  @Column({ default: false })
+  isRecovery: boolean
+
   @Column({ default: null })
   dirId: number
 
