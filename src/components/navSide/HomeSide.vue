@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import api from '@/api'
 import { useFileStore } from '@/stores/file'
 
@@ -43,6 +44,7 @@ interface MenuItem {
   type: string
 }
 
+const route = useRoute()
 const fileStore = useFileStore()
 
 const menuList: MenuItem[] = [
@@ -79,9 +81,16 @@ const category = ref('')
 const clickItem = (type: string, index: number) => {
   category.value = type
   activeIndex.value = index
+  let isRecovery = false
+  if (route.path === '/') {
+    isRecovery = false
+  } else {
+    isRecovery = true
+  }
   api.file
     .getFileList({
       type,
+      isRecovery,
     })
     .then((res) => {
       fileStore.setFileList(res.data)

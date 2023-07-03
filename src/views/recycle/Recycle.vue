@@ -137,7 +137,7 @@
 </template>
 
 <script lang="ts" setup>
-import { createVNode, onMounted, ref, watch } from 'vue'
+import { computed, createVNode, onMounted, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
@@ -145,6 +145,7 @@ import api from '../../api'
 import type { VxeColumnPropTypes, VxeTableInstance } from 'vxe-table'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
+import { useFileStore } from '@/stores/file'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -160,7 +161,9 @@ const audioType = [
   'wv',
 ]
 
-const tableData = ref<FileItem[]>([])
+const fileStore = useFileStore()
+
+const tableData = computed(() => fileStore.fileList)
 const selectList = ref<number[]>([])
 const checkAll = ref(false)
 const indeterminate = ref(false)
@@ -178,7 +181,7 @@ const getFileList = () => {
       isRecovery: true,
     })
     .then((res) => {
-      tableData.value = res.data
+      fileStore.setFileList(res.data)
     })
 }
 
