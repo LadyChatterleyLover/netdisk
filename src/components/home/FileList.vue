@@ -126,35 +126,31 @@
       </vxe-column>
       <vxe-column title="大小" field="size" sortable align="center">
         <template #default="{ row }">
-          {{ row.isDir ? '-' : formatSize(row.size) }}
+          {{ row.isDir ? '-' : useFormatFileSize(row.size) }}
         </template>
       </vxe-column>
     </vxe-table>
     <PreviewVideo ref="PreviewVideoRef" />
     <PreviewAudio ref="PreviewAudioRef" />
     <PreviewTxt ref="PreviewTxtRef" />
+    <PreviewZip ref="PreviewZipRef" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { inject, ref, watch } from 'vue'
 import dayjs from 'dayjs'
-import JSZip from 'jszip'
 import { cloneDeep } from 'lodash-es'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import api from '../../api'
-import type { JSZipObject } from 'jszip'
 import type { FileItem } from '@/types/file'
+import { useFormatFileSize } from '@/hooks/useFormatFileSize'
 import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
 import PreviewAudio from '@/components/previewAudio/PreviewAudio.vue'
 import PreviewTxt from '@/components/previewTxt/PreviewTxt.vue'
-
-interface ZipItem {
-  name: string
-  children?: ZipItem[]
-}
+import PreviewZip from '@/components/previewZip/PreviewZip.vue'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -184,20 +180,9 @@ const router = useRouter()
 const PreviewVideoRef = ref()
 const PreviewAudioRef = ref()
 const PreviewTxtRef = ref()
+const PreviewZipRef = ref()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
-
-const formatSize = (size: number) => {
-  if (size < 1024) {
-    return `${size.toFixed(2)}B`
-  } else if (size >= 1024 && size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(2)}KB`
-  } else if (size >= 1024 && size < 1024 * 1024 * 1024) {
-    return `${(size / 1024 / 1024).toFixed(2)}M`
-  } else if (size >= 1024 && size < 1024 * 1024 * 1024 * 1024) {
-    return `${(size / 1024 / 1024 / 1024).toFixed(2)}G`
-  }
-}
 
 const clickItem = (row: FileItem) => {
   if (videoType.includes(row.ext)) {
@@ -265,37 +250,7 @@ const viewTxt = async (url: string, name: string) => {
 }
 
 const viewZip = async (row: FileItem) => {
-  const { data } = await axios.get(row.url, { responseType: 'arraybuffer' })
-  const zip = await JSZip.loadAsync(data)
-  extractFiles(zip.files)
-}
-
-const extractFiles = (files: { [key: string]: JSZipObject }) => {
-  const buildFileTree = (paths: string[]) => {
-    const root = { name: '/', children: [] }
-    for (const path of paths) {
-      const parts = path.split('/')
-      let currentNode: any = root
-      for (const part of parts) {
-        let childNode: any = currentNode.children.find(
-          (node: any) => node.name === part
-        )
-        if (!childNode) {
-          const fullPath =
-            currentNode.name === '/'
-              ? `/${part}`
-              : `${currentNode.fullPath}/${part}`
-          childNode = { name: part, fullPath, children: [] }
-          currentNode.children.push(childNode)
-        }
-        currentNode = childNode
-      }
-    }
-    return root.children
-  }
-  const fileNames = Object.keys(files)
-  const tree = buildFileTree(fileNames)
-  console.log('tree', tree)
+  PreviewZipRef.value?.open(row)
 }
 
 const confirm = (row: FileItem) => {
