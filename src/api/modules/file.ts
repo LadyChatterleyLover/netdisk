@@ -8,7 +8,7 @@ export default {
   getFileList(params?: {
     name?: string
     type?: string
-    dirId?: number | null
+    dirId?: number
     isDir?: number
     isRecovery?: number
   }) {

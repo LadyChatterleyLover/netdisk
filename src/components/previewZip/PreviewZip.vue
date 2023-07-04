@@ -14,32 +14,10 @@
     <div
       class="text-[#afb3bf] bg-[#fafafc] flex items-center h-10 rounded pr-[14px] pl-6 mt-3 mb-5"
     >
-      <a-breadcrumb separator="">
-        <template v-if="breadcrumbPaths.length">
-          <a-breadcrumb-item class="active">
-            <span @click="back">返回上一级</span>
-          </a-breadcrumb-item>
-          <a-breadcrumb-separator>|</a-breadcrumb-separator>
-        </template>
-        <a-breadcrumb-item
-          :class="{ active: breadcrumbPaths.length }"
-          @click="clickAll"
-          >全部文件</a-breadcrumb-item
-        >
-        <a-breadcrumb-separator v-if="breadcrumbPaths.length"
-          >&gt;</a-breadcrumb-separator
-        >
-        <template v-for="(item, index) in breadcrumbPaths" :key="index">
-          <a-breadcrumb-item
-            :class="{ active: item.children && item.children.length }"
-          >
-            <span @click="clickBreadcrumb(item, index)">{{ item.name }}</span>
-          </a-breadcrumb-item>
-          <a-breadcrumb-separator v-if="index !== breadcrumbPaths.length - 1"
-            >&gt;</a-breadcrumb-separator
-          >
-        </template>
-      </a-breadcrumb>
+      <FileBreadcrumb
+        v-model:fileList="fileList"
+        v-model:breadcrumbPaths="breadcrumbPaths"
+      />
     </div>
     <vxe-table :data="fileList">
       <vxe-column title="文件名" align="center">
@@ -84,6 +62,7 @@ import JSZip from 'jszip'
 import { cloneDeep } from 'lodash-es'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
+import FileBreadcrumb from '@/components/fileBreadcrumb/FileBreadcrumb.vue'
 
 interface ZipItem {
   name: string
@@ -150,27 +129,6 @@ const clickItem = (row: ZipItem) => {
   if (row.children && row.children.length) {
     fileList.value = cloneDeep(row.children)
     breadcrumbPaths.value.push(row)
-  }
-}
-
-const clickBreadcrumb = (row: ZipItem, index: number) => {
-  if (row.children && row.children.length) {
-    fileList.value = cloneDeep(row.children)
-    breadcrumbPaths.value = breadcrumbPaths.value.slice(0, index + 1)
-  }
-}
-
-const clickAll = () => {
-  if (breadcrumbPaths.value.length) {
-    fileList.value = cloneFileList.value
-    breadcrumbPaths.value = []
-  }
-}
-
-const back = () => {
-  if (breadcrumbPaths.value.length === 1) {
-    breadcrumbPaths.value = []
-    fileList.value = cloneFileList.value
   }
 }
 

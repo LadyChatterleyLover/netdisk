@@ -1,4 +1,10 @@
 <template>
+  <div class="font-bold text-sm my-5">
+    <FileBreadcrumb
+      v-model:fileList="tableData"
+      v-model:breadcrumbPaths="breadcrumbPaths"
+    />
+  </div>
   <div class="mt-8 file-list-table">
     <vxe-table :data="tableData">
       <vxe-column title="文件名">
@@ -193,6 +199,7 @@ import PreviewAudio from '@/components/previewAudio/PreviewAudio.vue'
 import PreviewTxt from '@/components/previewTxt/PreviewTxt.vue'
 import PreviewZip from '@/components/previewZip/PreviewZip.vue'
 import MoveFile from '@/components/moveFile/MoveFile.vue'
+import FileBreadcrumb from '@/components/fileBreadcrumb/FileBreadcrumb.vue'
 import { download } from '@/utils/util'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
@@ -209,7 +216,18 @@ const audioType = [
   'wv',
 ]
 
-const getFileList = inject<() => void>('getFileList')
+const getFileList = inject<
+  (
+    params?: {
+      name?: string
+      type?: string
+      dirId?: number
+      isDir?: number
+      isRecovery?: number
+    },
+    row?: FileItem
+  ) => Promise<{ data: FileItem[] }>
+>('getFileList')
 
 const props = defineProps<{
   fileList: FileItem[]
@@ -227,6 +245,7 @@ const PreviewZipRef = ref()
 const MoveFileRef = ref()
 const inputRef = ref<HTMLInputElement>()
 const tableData = ref<FileItem[]>([])
+const breadcrumbPaths = ref<FileItem[]>([])
 const checkAll = ref(false)
 
 const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
@@ -248,6 +267,15 @@ const clickMenu = (row: FileItem, { key }: { key: string }) => {
 }
 
 const clickItem = (row: FileItem) => {
+  if (row.isDir) {
+    breadcrumbPaths.value.push(row)
+    getFileList?.(
+      {
+        dirId: row.id,
+      },
+      row
+    )
+  }
   if (videoType.includes(row.ext)) {
     viewVideo(row.url)
   }

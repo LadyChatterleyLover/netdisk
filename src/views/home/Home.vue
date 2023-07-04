@@ -59,7 +59,6 @@
       </div>
     </div>
   </div>
-  <div class="font-bold text-sm my-5">全部文件</div>
   <a-spin :spinning="loading" tip="上传中...">
     <FileList ref="fileListRef" v-model:file-list="fileList" />
   </a-spin>
@@ -70,6 +69,7 @@ import { computed, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { type UploadProps, message } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import type { FileItem } from '@/types/file'
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
 import { useFileStore } from '@/stores/file'
@@ -82,19 +82,25 @@ const fileListRef = ref()
 const category = ref('')
 const loading = ref(false)
 
-const getFileList = (params?: {
-  name?: string
-  type?: string
-  dirId?: number | null
-  isDir?: number
-  isRecovery?: number
-}) => {
+const getFileList = (
+  params?: {
+    name?: string
+    type?: string
+    dirId?: number
+    isDir?: number
+    isRecovery?: number
+  },
+  row?: FileItem
+) => {
   api.file.getFileList(params).then((res) => {
     res.data.forEach((item) => {
       item.checked = false
       item.isAdd = false
     })
     fileStore.setFileList(res.data)
+    if (row && res.data.length) {
+      row.children = res.data
+    }
   })
 }
 
