@@ -88,7 +88,7 @@ export class FileController {
     return this.fileService.reductionFile(ids)
   }
 
-  @Patch(':id')
+  @Post(':id')
   async update(@Param('id') id: string, @Body() updateFileDto) {
     return this.fileService.updateFile(+id, updateFileDto)
   }

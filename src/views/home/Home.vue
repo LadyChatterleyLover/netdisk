@@ -82,8 +82,14 @@ const fileListRef = ref()
 const category = ref('')
 const loading = ref(false)
 
-const getFileList = () => {
-  api.file.getFileList().then((res) => {
+const getFileList = (params?: {
+  name?: string
+  type?: string
+  dirId?: number | null
+  isDir?: number
+  isRecovery?: number
+}) => {
+  api.file.getFileList(params).then((res) => {
     res.data.forEach((item) => {
       item.checked = false
       item.isAdd = false

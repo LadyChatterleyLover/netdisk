@@ -174,6 +174,8 @@ export class FileService {
     }
     if (dirId) {
       query.andWhere('file.dirId = :dirId', { dirId })
+    } else {
+      query.andWhere({ dirId: 0 })
     }
     if (isDir) {
       query.andWhere({ isDir: 1 })

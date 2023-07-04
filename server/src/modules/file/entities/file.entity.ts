@@ -31,7 +31,7 @@ export class File {
   @Column({ default: 0 })
   isRecovery: number
 
-  @Column({ default: null })
+  @Column({ default: 0 })
   dirId: number
 
   @ManyToOne(() => User, (user) => user.files)

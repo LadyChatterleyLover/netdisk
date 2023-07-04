@@ -139,7 +139,7 @@
                   style="color: #06a7ff"
                 />
                 <template #overlay>
-                  <a-menu>
+                  <a-menu @click="(e: any) => clickMenu(row, e)">
                     <a-menu-item key="1">
                       <span>重命名</span>
                     </a-menu-item>
@@ -172,6 +172,7 @@
     <PreviewAudio ref="PreviewAudioRef" />
     <PreviewTxt ref="PreviewTxtRef" />
     <PreviewZip ref="PreviewZipRef" />
+    <MoveFile ref="MoveFileRef" />
   </div>
 </template>
 
@@ -191,6 +192,7 @@ import PreviewVideo from '@/components/previewVideo/PreviewVideo.vue'
 import PreviewAudio from '@/components/previewAudio/PreviewAudio.vue'
 import PreviewTxt from '@/components/previewTxt/PreviewTxt.vue'
 import PreviewZip from '@/components/previewZip/PreviewZip.vue'
+import MoveFile from '@/components/moveFile/MoveFile.vue'
 import { download } from '@/utils/util'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
@@ -222,6 +224,7 @@ const PreviewVideoRef = ref()
 const PreviewAudioRef = ref()
 const PreviewTxtRef = ref()
 const PreviewZipRef = ref()
+const MoveFileRef = ref()
 const inputRef = ref<HTMLInputElement>()
 const tableData = ref<FileItem[]>([])
 const checkAll = ref(false)
@@ -230,6 +233,18 @@ const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
   cellValue,
 }) => {
   return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
+}
+
+const clickMenu = (row: FileItem, { key }: { key: string }) => {
+  if (key === '1') {
+    //
+  }
+  if (key === '12') {
+    //
+  }
+  if (key === '3') {
+    MoveFileRef.value?.open(row)
+  }
 }
 
 const clickItem = (row: FileItem) => {

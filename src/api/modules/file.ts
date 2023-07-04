@@ -8,9 +8,9 @@ export default {
   getFileList(params?: {
     name?: string
     type?: string
-    dirId?: number
-    isDir?: boolean
-    isRecovery?: boolean
+    dirId?: number | null
+    isDir?: number
+    isRecovery?: number
   }) {
     return post<FileItem[]>('/file', params, true)
   },

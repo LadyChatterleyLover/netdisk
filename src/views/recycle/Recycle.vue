@@ -178,7 +178,7 @@ const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
 const getFileList = () => {
   api.file
     .getFileList({
-      isRecovery: true,
+      isRecovery: 1,
     })
     .then((res) => {
       fileStore.setFileList(res.data)
@@ -188,7 +188,7 @@ const getFileList = () => {
 const selectAll = () => {
   indeterminate.value = false
   if (checkAll.value) {
-    selectList.value = tableData.value.map((item) => item.id)
+    selectList.value = tableData.value.map((item) => item.id) as number[]
     tableData.value.forEach((item) => {
       item.checked = true
     })
@@ -202,7 +202,7 @@ const selectAll = () => {
 
 const changeRow = (row: FileItem) => {
   if (row.checked) {
-    selectList.value.push(row.id)
+    selectList.value.push(row.id as number)
   } else {
     selectList.value = selectList.value.filter((item) => item !== row.id)
   }
@@ -216,7 +216,7 @@ const clear = () => {
     width: '500px',
     onOk() {
       const ids = tableData.value.map((item) => item.id)
-      api.file.deleteFile(ids).then((res) => {
+      api.file.deleteFile(ids as number[]).then((res) => {
         if (res.code === 200) {
           message.success(res.msg)
           getFileList?.()
@@ -230,14 +230,14 @@ const clear = () => {
 
 const reductionFile = (row?: FileItem) => {
   const ids: number[] = []
-  if (row.id) {
-    ids.push(row.id)
+  if (row!.id) {
+    ids.push(row!.id)
   }
   Modal.confirm({
     icon: createVNode(ExclamationCircleOutlined),
     content: '确认还原选中的文件？',
     onOk() {
-      api.file.reductionFile(row.id ? ids : selectList.value).then((res) => {
+      api.file.reductionFile(row!.id ? ids : selectList.value).then((res) => {
         if (res.code === 200) {
           message.success(res.msg)
           getFileList()
