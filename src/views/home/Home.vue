@@ -1,62 +1,74 @@
 <template>
-  <div class="flex">
-    <a-dropdown>
-      <a-upload
-        multiple
-        :max-count="10"
-        :show-upload-list="false"
-        :custom-request="handleCustomRequest"
+  <div class="flex justify-between">
+    <div class="flex">
+      <a-dropdown>
+        <a-upload
+          multiple
+          :max-count="10"
+          :show-upload-list="false"
+          :custom-request="handleCustomRequest"
+        >
+          <a-button type="primary" style="border-radius: 24px">
+            <template #icon>
+              <upload-outlined />
+            </template>
+            上传
+          </a-button>
+        </a-upload>
+        <template #overlay>
+          <a-menu>
+            <a-menu-item key="1">
+              <a-upload
+                multiple
+                :max-count="10"
+                :show-upload-list="false"
+                :custom-request="handleCustomRequest"
+              >
+                <span>上传文件</span>
+              </a-upload>
+            </a-menu-item>
+            <a-menu-item key="2">
+              <a-upload
+                multiple
+                :max-count="10"
+                :show-upload-list="false"
+                directory
+                :custom-request="handleCustomRequest"
+              >
+                <span>上传文件夹</span>
+              </a-upload>
+            </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
+      <div
+        class="flex items-center px-4 ml-5 h-8 bg-[#f0faff] text-[#06a7ff] rounded-3xl cursor-pointer"
       >
-        <a-button type="primary" style="border-radius: 24px">
-          <template #icon>
-            <upload-outlined />
-          </template>
-          上传
-        </a-button>
-      </a-upload>
-      <template #overlay>
-        <a-menu>
-          <a-menu-item key="1">
-            <a-upload
-              multiple
-              :max-count="10"
-              :show-upload-list="false"
-              :custom-request="handleCustomRequest"
-            >
-              <span>上传文件</span>
-            </a-upload>
-          </a-menu-item>
-          <a-menu-item key="2">
-            <a-upload
-              multiple
-              :max-count="10"
-              :show-upload-list="false"
-              directory
-              :custom-request="handleCustomRequest"
-            >
-              <span>上传文件夹</span>
-            </a-upload>
-          </a-menu-item>
-        </a-menu>
-      </template>
-    </a-dropdown>
-    <div
-      class="flex items-center px-4 ml-5 h-8 bg-[#f0faff] text-[#06a7ff] rounded-3xl cursor-pointer"
-    >
-      <div class="flex h-full items-center">
-        <folder-add-outlined class="text-sm" />
-        <div class="ml-2 font-bold" @click="addDir">新建文件夹</div>
+        <div class="flex h-full items-center">
+          <folder-add-outlined class="text-sm" />
+          <div class="ml-2 font-bold" @click="addDir">新建文件夹</div>
+        </div>
+        <a-divider type="vertical" />
+        <div class="flex h-full items-center">
+          <file-add-outlined class="text-sm" />
+          <div class="ml-2 font-bold">新建在线文档</div>
+        </div>
+        <a-divider type="vertical" />
+        <div class="flex h-full items-center">
+          <download-outlined class="text-sm" />
+          <div class="ml-2 font-bold" @click="downloadFile">下载文件</div>
+        </div>
       </div>
-      <a-divider type="vertical" />
-      <div class="flex h-full items-center">
-        <file-add-outlined class="text-sm" />
-        <div class="ml-2 font-bold">新建在线文档</div>
-      </div>
-      <a-divider type="vertical" />
-      <div class="flex h-full items-center">
-        <download-outlined class="text-sm" />
-        <div class="ml-2 font-bold" @click="downloadFile">下载文件</div>
-      </div>
+    </div>
+
+    <div>
+      <a-input-search
+        v-model:value="value"
+        placeholder="搜索我的文件"
+        enter-button
+        allow-clear
+        @search="onSearch"
+      />
     </div>
   </div>
   <div class="h-full">
@@ -87,6 +99,7 @@ const fileList = computed(() => fileStore.fileList)
 const selectList = ref<FileItem[]>([])
 const fileListRef = ref()
 const category = ref('')
+const value = ref('')
 const loading = ref(false)
 
 const getFileList = (
@@ -109,6 +122,12 @@ const getFileList = (
     if (row && res.data.length) {
       row.children = res.data
     }
+  })
+}
+
+const onSearch = (val: string) => {
+  getFileList({
+    name: val,
   })
 }
 
