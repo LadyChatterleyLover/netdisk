@@ -59,9 +59,9 @@
       </div>
     </div>
   </div>
-  <a-spin :spinning="loading" tip="上传中...">
+  <div class="h-full">
     <FileList ref="fileListRef" v-model:file-list="fileList" />
-  </a-spin>
+  </div>
 </template>
 
 <script setup lang="ts">

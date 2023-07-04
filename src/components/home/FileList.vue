@@ -5,7 +5,7 @@
       v-model:breadcrumbPaths="breadcrumbPaths"
     />
   </div>
-  <div class="mt-8 file-list-table">
+  <div v-if="tableData.length" class="mt-8 file-list-table">
     <vxe-table :data="tableData">
       <vxe-column title="文件名">
         <template #header="{ column }">
@@ -180,6 +180,50 @@
     <PreviewZip ref="PreviewZipRef" />
     <MoveFile ref="MoveFileRef" />
   </div>
+  <div v-else class="w-full h-full flex flex-col justify-center items-center">
+    <a-empty>
+      <template #imgae>
+        <img width="120" height="112" src="../../assets/empty.png" alt="" />
+      </template>
+      <template #description>
+        <span class="text-xs text-[#818999]"
+          >当前列表为空，上传你的第一个文件吧</span
+        >
+      </template>
+    </a-empty>
+    <div class="mt-3 flex items-center">
+      <a-upload
+        multiple
+        :max-count="10"
+        :show-upload-list="false"
+        :custom-request="handleCustomRequest"
+      >
+        <div
+          class="flex flex-col items-center justify-center w-[94px] h-[94px] mr-6 bg-[#f7f9fc] cursor-pointer"
+        >
+          <img
+            src="../../assets/uoload-single-file.png"
+            width="42"
+            height="42"
+            alt=""
+          />
+          <div>上传文件</div>
+        </div>
+      </a-upload>
+      <div
+        class="flex flex-col items-center justify-center w-[94px] h-[94px] bg-[#f7f9fc] cursor-pointer"
+        @click="addDir"
+      >
+        <img
+          src="../../assets/create-new-floder.png"
+          width="42"
+          height="42"
+          alt=""
+        />
+        <div>新建文件夹</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -191,6 +235,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import api from '../../api'
+import type { UploadProps } from 'ant-design-vue'
 import type { VxeColumnPropTypes } from 'vxe-table'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
@@ -264,6 +309,37 @@ const clickMenu = (row: FileItem, { key }: { key: string }) => {
   if (key === '3') {
     MoveFileRef.value?.open(row)
   }
+}
+
+const addDir = () => {
+  tableData.value.unshift({
+    name: '',
+    createAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    updateAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    isDir: true,
+    size: 0,
+    checked: false,
+    ext: '',
+    url: '',
+    isAdd: true,
+  })
+  setTimeout(() => {
+    setInputFocus()
+  }, 100)
+}
+
+const handleCustomRequest: UploadProps['customRequest'] = (options) => {
+  const { file } = options
+  const formData = new FormData()
+  formData.append('file', file)
+  api.file.uploadFile(formData).then((res) => {
+    if (res.code === 200) {
+      message.success(res.msg)
+      getFileList?.()
+    } else {
+      message.error(res.msg)
+    }
+  })
 }
 
 const clickItem = (row: FileItem) => {
