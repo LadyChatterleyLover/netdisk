@@ -103,6 +103,7 @@ const getFileList = (
     res.data.forEach((item) => {
       item.checked = false
       item.isAdd = false
+      item.isRename = false
     })
     fileStore.setFileList(res.data)
     if (row && res.data.length) {

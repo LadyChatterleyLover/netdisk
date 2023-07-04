@@ -10,5 +10,6 @@ export interface FileItem {
   updateAt: string
   checked: boolean
   isAdd: boolean
+  isRename: boolean
   children?: FileItem[]
 }

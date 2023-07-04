@@ -113,7 +113,29 @@
                   @press-enter="confirm(row)"
                 />
               </div>
-              <div v-else @click="clickItem(row)">{{ row.name }}</div>
+              <div v-else class="flex items-center">
+                <a-input
+                  v-if="row.isRename"
+                  v-model:value="row.name"
+                  allow-clear
+                  size="small"
+                />
+                <div v-else @click="clickItem(row)">{{ row.name }}</div>
+                <div v-if="row.isRename" class="flex items-center">
+                  <div
+                    class="w-6 h-6 flex justify-center items-center ml-2 bg-[#06a7ff] text-white rounded-md"
+                    @click="renameConfirm(row)"
+                  >
+                    <check-outlined class="text-small" />
+                  </div>
+                  <div
+                    class="w-6 h-6 flex justify-center items-center ml-3 bg-[#06a7ff] text-white rounded-md"
+                    @click.stop="renameCancel(row)"
+                  >
+                    <close-outlined class="text-small" />
+                  </div>
+                </div>
+              </div>
             </div>
             <div v-if="row.isAdd" class="flex items-center">
               <div
@@ -129,7 +151,7 @@
                 <close-outlined class="text-small" />
               </div>
             </div>
-            <div v-if="!row.isAdd" class="hidden action">
+            <div v-if="!row.isAdd && !row.isRename" class="hidden action">
               <a-tooltip title="分享" placement="bottom">
                 <share-alt-outlined
                   class="mr-3 text-sm"
@@ -158,12 +180,15 @@
                 <template #overlay>
                   <a-menu @click="(e: any) => clickMenu(row, e)">
                     <a-menu-item key="1">
+                      <column-height-outlined class="mr-2" />
                       <span>重命名</span>
                     </a-menu-item>
                     <a-menu-item key="2">
+                      <copy-outlined class="mr-2" />
                       <span>复制</span>
                     </a-menu-item>
                     <a-menu-item key="3">
+                      <drag-outlined class="mr-2" />
                       <span>移动</span>
                     </a-menu-item>
                   </a-menu>
@@ -308,6 +333,7 @@ const tableData = ref<FileItem[]>([])
 const breadcrumbPaths = ref<FileItem[]>([])
 const checkAll = ref(false)
 const activeItem = ref<FileItem>()
+const cancelItem = ref<FileItem>()
 
 const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
   cellValue,
@@ -339,10 +365,11 @@ const changeRow = (row: FileItem) => {
 }
 
 const clickMenu = (row: FileItem, { key }: { key: string }) => {
+  cancelItem.value = cloneDeep(row)
   if (key === '1') {
-    //
+    row.isRename = true
   }
-  if (key === '12') {
+  if (key === '2') {
     //
   }
   if (key === '3') {
@@ -483,7 +510,9 @@ const delFile = (row: FileItem) => {
       api.file.recoveryFile([row.id!]).then((res) => {
         if (res.code === 200) {
           message.success(res.msg)
-          getFileList?.()
+          getFileList?.({
+            dirId: activeItem.value?.id,
+          })
         } else {
           message.error(res.msg)
         }
@@ -518,6 +547,32 @@ const confirm = (row: FileItem) => {
 const cancel = () => {
   tableData.value.shift()
   emits('update:fileList', tableData.value)
+}
+
+const renameConfirm = (row: FileItem) => {
+  if (!row.name) {
+    message.warning('文件名不能为空')
+    return
+  }
+  api.file
+    .updateFile(row.id!, {
+      name: row.name,
+    })
+    .then((res) => {
+      if (res.code === 200) {
+        message.success(res.msg)
+        getFileList?.({
+          dirId: activeItem.value?.id,
+        })
+      } else {
+        message.error(res.msg)
+      }
+    })
+}
+
+const renameCancel = (row: FileItem) => {
+  row.name = cancelItem.value?.name as string
+  row.isRename = false
 }
 
 const setInputFocus = () => {
