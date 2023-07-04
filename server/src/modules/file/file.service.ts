@@ -216,12 +216,13 @@ export class FileService {
     }
   }
 
-  async updateFile(id: number, updateFileDto) {
+  async updateFile(updateFileDto) {
     const data = await this.fileRepository.findOne({
       where: {
-        id,
+        id: updateFileDto.id,
       },
     })
+    delete updateFileDto.id
     const newData = Object.assign(data, { ...updateFileDto })
     if (updateFileDto.users && updateFileDto.users.length) {
       const users = await this.userRepository
@@ -285,6 +286,45 @@ export class FileService {
       return {
         code: 500,
         msg: '还原成功',
+      }
+    }
+  }
+  async copyFile(id: number, userId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    })
+    const file = await this.fileRepository.findOne({
+      where: {
+        id,
+      },
+    })
+    if (!file) {
+      return {
+        code: 500,
+        msg: '文件不存在',
+      }
+    }
+    const name = `${file.name.replace(`.${file.ext}`, '')}_${dayjs().format(
+      'YYYYMMDD',
+    )}_${dayjs().format('HHmmss')}.${file.ext}`
+    const newFile = {
+      ...file,
+      user,
+      name,
+    }
+    delete newFile.id
+    const res = await this.fileRepository.save(newFile)
+    if (res) {
+      return {
+        code: 200,
+        msg: '复制成功',
+      }
+    } else {
+      return {
+        code: 500,
+        msg: '复制成功',
       }
     }
   }

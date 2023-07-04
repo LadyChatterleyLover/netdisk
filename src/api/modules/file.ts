@@ -26,7 +26,10 @@ export default {
   reductionFile(ids: number[]) {
     return post('/file/reductionFile', ids, true)
   },
-  updateFile(id: number, params: any) {
-    return post(`/file/${id}`, params, true)
+  updateFile(params: any) {
+    return post(`/file/updateFile`, params, true)
+  },
+  copyFile(params: { id: number }) {
+    return post('/file/copyFile', params, true)
   },
 }

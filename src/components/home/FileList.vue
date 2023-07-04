@@ -183,7 +183,7 @@
                       <column-height-outlined class="mr-2" />
                       <span>重命名</span>
                     </a-menu-item>
-                    <a-menu-item key="2">
+                    <a-menu-item v-if="!row.isDir" key="2">
                       <copy-outlined class="mr-2" />
                       <span>复制</span>
                     </a-menu-item>
@@ -370,7 +370,20 @@ const clickMenu = (row: FileItem, { key }: { key: string }) => {
     row.isRename = true
   }
   if (key === '2') {
-    //
+    api.file
+      .copyFile({
+        id: row.id as number,
+      })
+      .then((res) => {
+        if (res.code === 200) {
+          message.success(res.msg)
+          getFileList?.({
+            dirId: activeItem.value?.id,
+          })
+        } else {
+          message.error(res.msg)
+        }
+      })
   }
   if (key === '3') {
     MoveFileRef.value?.open(row)
@@ -555,7 +568,8 @@ const renameConfirm = (row: FileItem) => {
     return
   }
   api.file
-    .updateFile(row.id!, {
+    .updateFile({
+      id: row.id!,
       name: row.name,
     })
     .then((res) => {

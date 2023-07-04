@@ -73,7 +73,8 @@ const clickItem = (item: FileItem) => {
 
 const confirm = () => {
   api.file
-    .updateFile(current.value!.id as number, {
+    .updateFile({
+      id: current.value!.id as number,
       dirId: activeItem.value!.id,
     })
     .then((res) => {

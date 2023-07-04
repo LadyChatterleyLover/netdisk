@@ -91,8 +91,14 @@ export class FileController {
     return this.fileService.reductionFile(ids)
   }
 
-  @Post(':id')
-  async update(@Param('id') id: string, @Body() updateFileDto) {
-    return this.fileService.updateFile(+id, updateFileDto)
+  @Post('updateFile')
+  async update(@Body() updateFileDto) {
+    console.log('update')
+    return this.fileService.updateFile(updateFileDto)
+  }
+
+  @Post('copyFile')
+  async copyFile(@Body() params: { id: number }, @Req() req) {
+    return this.fileService.copyFile(params.id, req.user.id)
   }
 }
