@@ -55,12 +55,16 @@
       <a-divider type="vertical" />
       <div class="flex h-full items-center">
         <download-outlined class="text-sm" />
-        <div class="ml-2 font-bold">下载文件</div>
+        <div class="ml-2 font-bold" @click="downloadFile">下载文件</div>
       </div>
     </div>
   </div>
   <div class="h-full">
-    <FileList ref="fileListRef" v-model:file-list="fileList" />
+    <FileList
+      ref="fileListRef"
+      v-model:file-list="fileList"
+      v-model:select-data="selectList"
+    />
   </div>
 </template>
 
@@ -69,6 +73,8 @@ import { computed, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { type UploadProps, message } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import JSZip from 'jszip'
+import FileSaver from 'file-saver'
 import type { FileItem } from '@/types/file'
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
@@ -78,6 +84,7 @@ const route = useRoute()
 const fileStore = useFileStore()
 const fileList = computed(() => fileStore.fileList)
 
+const selectList = ref<FileItem[]>([])
 const fileListRef = ref()
 const category = ref('')
 const loading = ref(false)
@@ -138,6 +145,26 @@ const addDir = () => {
     isAdd: true,
   })
   fileListRef.value?.setInputFocus()
+}
+
+const downloadFile = async () => {
+  if (!selectList.value.length) {
+    message.warning('请先选择文件!')
+    return
+  }
+  selectList.value = selectList.value.filter((item) => !item.isDir)
+  const zip = new JSZip()
+  const fileUrls = selectList.value.map((item) => item.url)
+  await Promise.all(fileUrls.map((url) => addFileToZip(zip, url)))
+  const zipBlob = await zip.generateAsync({ type: 'blob' })
+  FileSaver.saveAs(zipBlob, `【批量下载】${selectList.value[0].name}等.zip`)
+}
+
+const addFileToZip = async (zip: JSZip, url: string) => {
+  const response = await fetch(url)
+  const blob = await response.blob()
+  const filename = url.slice(Math.max(0, url.lastIndexOf('/') + 1))
+  zip.file(window.decodeURIComponent(filename), blob)
 }
 
 provide('getFileList', getFileList)

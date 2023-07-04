@@ -26,6 +26,9 @@ dependencies:
   dayjs:
     specifier: ^1.11.8
     version: 1.11.8
+  file-saver:
+    specifier: ^2.0.5
+    version: 2.0.5
   jszip:
     specifier: ^3.10.1
     version: 3.10.1
@@ -70,6 +73,9 @@ devDependencies:
   '@tsconfig/node18':
     specifier: ^2.0.1
     version: 2.0.1
+  '@types/file-saver':
+    specifier: ^2.0.5
+    version: 2.0.5
   '@types/lodash-es':
     specifier: ^4.17.7
     version: registry.npmmirror.com/@types/lodash-es@4.17.7
@@ -1331,6 +1337,13 @@ packages:
     resolution:
       {
         integrity: sha512-UqdfvuJK0SArA2CxhKWwwAWfnVSXiYe63bVpMutc27vpngCntGUZQETO24pEJ46zU6XM+7SpqYoMgcO3bM11Ew==,
+      }
+    dev: true
+
+  /@types/file-saver@2.0.5:
+    resolution:
+      {
+        integrity: sha512-zv9kNf3keYegP5oThGLaPk8E081DFDuwfqjtiTzm6PoxChdJ1raSuADf2YGCVIyrSynLrgc8JWv296s7Q7pQSQ==,
       }
     dev: true
 
@@ -3771,6 +3784,13 @@ packages:
     dependencies:
       flat-cache: 3.0.4
     dev: true
+
+  /file-saver@2.0.5:
+    resolution:
+      {
+        integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==,
+      }
+    dev: false
 
   /fill-range@7.0.1:
     resolution:

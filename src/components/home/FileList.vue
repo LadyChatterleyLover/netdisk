@@ -11,15 +11,26 @@
         <template #header="{ column }">
           <div class="flex">
             <div class="ml-2">
-              <a-checkbox v-model:checked="checkAll" />
+              <a-checkbox
+                v-model:checked="checkAll"
+                :indeterminate="indeterminate"
+                @change="selectAll"
+              />
             </div>
             <div class="ml-5">{{ column.title }}</div>
           </div>
         </template>
         <template #default="{ row }">
           <div class="flex items-center file-item cursor-pointer">
-            <div v-if="!row.isAdd" class="mx-2 invisible check-item">
-              <a-checkbox v-model:checked="row.checked" />
+            <div
+              v-if="!row.isAdd"
+              class="mx-2 invisible check-item"
+              :style="{ visibility: row.checked ? 'visible' : 'hidden' }"
+            >
+              <a-checkbox
+                v-model:checked="row.checked"
+                @change="changeRow(row)"
+              />
             </div>
             <div class="w-8 flex">
               <img
@@ -276,13 +287,17 @@ const getFileList = inject<
 
 const props = defineProps<{
   fileList: FileItem[]
+  selectData: FileItem[]
 }>()
 const emits = defineEmits<{
   'update:fileList': [val: FileItem[]]
+  'update:selectData': [val: FileItem[]]
 }>()
 
 const router = useRouter()
 
+const indeterminate = ref(false)
+const selectList = ref<FileItem[]>([])
 const PreviewVideoRef = ref()
 const PreviewAudioRef = ref()
 const PreviewTxtRef = ref()
@@ -298,6 +313,29 @@ const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
   cellValue,
 }) => {
   return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
+}
+
+const selectAll = () => {
+  indeterminate.value = false
+  if (checkAll.value) {
+    selectList.value = tableData.value
+    tableData.value.forEach((item) => {
+      item.checked = true
+    })
+  } else {
+    selectList.value = []
+    tableData.value.forEach((item) => {
+      item.checked = false
+    })
+  }
+}
+
+const changeRow = (row: FileItem) => {
+  if (row.checked) {
+    selectList.value.push(row)
+  } else {
+    selectList.value = selectList.value.filter((item) => item.id !== row.id)
+  }
 }
 
 const clickMenu = (row: FileItem, { key }: { key: string }) => {
@@ -496,6 +534,14 @@ watch(
   { deep: true, immediate: true }
 )
 
+watch(
+  () => selectList.value,
+  (val) => {
+    emits('update:selectData', val)
+  },
+  { deep: true }
+)
+
 defineExpose({
   setInputFocus,
 })
@@ -505,10 +551,10 @@ defineExpose({
 .file-item {
   &:hover {
     .check-item {
-      visibility: visible;
+      visibility: visible !important;
     }
     .action {
-      display: flex;
+      display: flex !important;
     }
   }
 }
