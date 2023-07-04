@@ -15,7 +15,7 @@ export default {
     return post<FileItem[]>('/file', params, true)
   },
   createDir(params: { name: string; dirId?: number }) {
-    return post('/file/createDir', params, true)
+    return post<FileItem>('/file/createDir', params, true)
   },
   deleteFile(ids: number[]) {
     return post('/file/patchDelete', ids, true)

@@ -6,7 +6,7 @@
           multiple
           :max-count="10"
           :show-upload-list="false"
-          :custom-request="handleCustomRequest"
+          :custom-request="(e: any) => handleCustomRequest(e, 'file')"
         >
           <a-button type="primary" style="border-radius: 24px">
             <template #icon>
@@ -22,7 +22,7 @@
                 multiple
                 :max-count="10"
                 :show-upload-list="false"
-                :custom-request="handleCustomRequest"
+                :custom-request="(e: any) => handleCustomRequest(e, 'file')"
               >
                 <span>上传文件</span>
               </a-upload>
@@ -33,7 +33,7 @@
                 :max-count="10"
                 :show-upload-list="false"
                 directory
-                :custom-request="handleCustomRequest"
+                :custom-request="(e: any) => handleCustomRequest(e, 'dir')"
               >
                 <span>上传文件夹</span>
               </a-upload>
@@ -83,11 +83,15 @@
 <script setup lang="ts">
 import { computed, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { type UploadProps, message } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import JSZip from 'jszip'
 import FileSaver from 'file-saver'
 import type { FileItem } from '@/types/file'
+import type {
+  RcFile,
+  UploadRequestOption,
+} from 'ant-design-vue/es/vc-upload/interface'
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
 import { useFileStore } from '@/stores/file'
@@ -97,6 +101,7 @@ const fileStore = useFileStore()
 const fileList = computed(() => fileStore.fileList)
 
 const selectList = ref<FileItem[]>([])
+const uploadFileList = ref<RcFile[]>([])
 const fileListRef = ref()
 const category = ref('')
 const value = ref('')
@@ -131,25 +136,32 @@ const onSearch = (val: string) => {
   })
 }
 
-const handleCustomRequest: UploadProps['customRequest'] = (options) => {
+const handleCustomRequest = (
+  options: UploadRequestOption<any>,
+  type: string
+) => {
   const { file } = options
-  const formData = new FormData()
-  formData.append('file', file)
-  loading.value = true
-  api.file
-    .uploadFile(formData)
-    .then((res) => {
-      if (res.code === 200) {
-        message.success(res.msg)
-        getFileList()
-      } else {
-        message.error(res.msg)
-      }
-      loading.value = false
-    })
-    .catch(() => {
-      loading.value = false
-    })
+  if (type === 'file') {
+    const formData = new FormData()
+    formData.append('file', file)
+    loading.value = true
+    api.file
+      .uploadFile(formData)
+      .then((res) => {
+        if (res.code === 200) {
+          message.success(res.msg)
+          getFileList()
+        } else {
+          message.error(res.msg)
+        }
+        loading.value = false
+      })
+      .catch(() => {
+        loading.value = false
+      })
+  } else {
+    uploadFileList.value.push(file as RcFile)
+  }
 }
 
 const addDir = () => {
@@ -199,6 +211,46 @@ watch(
     }
   },
   { immediate: true, deep: true }
+)
+
+watch(
+  () => uploadFileList.value,
+  (val) => {
+    if (val.length) {
+      const arr = val[0].webkitRelativePath.split('/')
+      const dirName = arr[0]
+      api.file
+        .createDir({
+          name: dirName,
+        })
+        .then((res) => {
+          if (res.code === 200) {
+            const dirId = res.data.id
+            const uploadArr: Promise<any>[] = []
+            val.forEach((item) => {
+              const formData = new FormData()
+              formData.append('file', item)
+              formData.append('dirId', String(dirId))
+              const request = api.file.uploadFile(formData)
+              uploadArr.push(request)
+            })
+            Promise.all(uploadArr)
+              .then((res) => {
+                if (res.length) {
+                  message.success('上传成功')
+                  getFileList?.()
+                }
+              })
+              .catch(() => {
+                message.error('上传失败')
+              })
+          } else {
+            message.error(res.msg)
+          }
+        })
+    }
+  },
+  { deep: true }
 )
 
 onMounted(() => {

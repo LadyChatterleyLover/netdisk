@@ -117,7 +117,7 @@ export class FileService {
     return res.url
   }
 
-  async createDir(name: string, user_id: number, dirId?: number) {
+  async createDir(name: string, user_id: number, dirId = 0) {
     const user = await this.userRepository.findOne({
       where: {
         id: user_id,
@@ -289,6 +289,7 @@ export class FileService {
       }
     }
   }
+
   async copyFile(id: number, userId: number) {
     const user = await this.userRepository.findOne({
       where: {
