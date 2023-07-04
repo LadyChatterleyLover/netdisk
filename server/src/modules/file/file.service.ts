@@ -117,7 +117,7 @@ export class FileService {
     return res.url
   }
 
-  async createDir(name: string, user_id: number) {
+  async createDir(name: string, user_id: number, dirId?: number) {
     const user = await this.userRepository.findOne({
       where: {
         id: user_id,
@@ -127,6 +127,7 @@ export class FileService {
       where: {
         name,
         isDir: 1,
+        dirId,
       },
     })
     if (existDir) {
@@ -139,6 +140,7 @@ export class FileService {
       name,
       isDir: 1,
       user,
+      dirId,
     })
     if (data) {
       return {

@@ -292,6 +292,7 @@ const inputRef = ref<HTMLInputElement>()
 const tableData = ref<FileItem[]>([])
 const breadcrumbPaths = ref<FileItem[]>([])
 const checkAll = ref(false)
+const activeItem = ref<FileItem>()
 
 const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
   cellValue,
@@ -332,10 +333,13 @@ const handleCustomRequest: UploadProps['customRequest'] = (options) => {
   const { file } = options
   const formData = new FormData()
   formData.append('file', file)
+  formData.append('dirId', activeItem.value ? String(activeItem.value.id) : '')
   api.file.uploadFile(formData).then((res) => {
     if (res.code === 200) {
       message.success(res.msg)
-      getFileList?.()
+      getFileList?.({
+        dirId: activeItem.value?.id,
+      })
     } else {
       message.error(res.msg)
     }
@@ -343,6 +347,7 @@ const handleCustomRequest: UploadProps['customRequest'] = (options) => {
 }
 
 const clickItem = (row: FileItem) => {
+  activeItem.value = row
   if (row.isDir) {
     breadcrumbPaths.value.push(row)
     getFileList?.(
@@ -457,11 +462,14 @@ const confirm = (row: FileItem) => {
   api.file
     .createDir({
       name: row.name,
+      dirId: activeItem.value ? activeItem.value.id : undefined,
     })
     .then((res: any) => {
       if (res.code === 200) {
         row.isAdd = false
-        getFileList?.()
+        getFileList?.({
+          dirId: activeItem.value ? activeItem.value.id : undefined,
+        })
         message.success(res.msg)
       } else {
         message.error(res.msg)
