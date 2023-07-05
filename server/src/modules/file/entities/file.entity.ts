@@ -44,7 +44,7 @@ export class File {
   shareUrl: string
 
   @Column({ default: 0 })
-  viewCount: 0
+  viewCount: number
 
   @ManyToOne(() => User, (user) => user.files)
   user: User

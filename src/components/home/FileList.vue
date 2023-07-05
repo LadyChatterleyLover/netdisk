@@ -409,6 +409,7 @@ const addDir = () => {
     isShared: 0,
     shareUrl: '',
     viewCount: 0,
+    extractedCode: '',
   })
   setTimeout(() => {
     setInputFocus()

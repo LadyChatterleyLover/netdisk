@@ -56,6 +56,6 @@ export default {
     }>('/file/findFileByCode', params, true)
   },
   extractFile(params: { urlCode: string; code: string }) {
-    return post('/file/extractFile', params, true)
+    return post<FileItem>('/file/extractFile', params, true)
   },
 }

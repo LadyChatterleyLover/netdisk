@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import * as OSS from 'ali-oss'
-import * as iconv from 'iconv-lite'
 import { InjectRepository } from '@nestjs/typeorm'
 import { File } from './entities/file.entity'
-import { Like, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { UploadFile } from './dto/file.dto'
 import { User } from '../user/entities/user.entity'
 import { ConfigService } from '@nestjs/config'
@@ -447,6 +446,7 @@ export class FileService {
       }
     }
   }
+
   async extractFile(urlCode: string, code: string) {
     const file = await this.fileRepository.findOne({
       where: {
