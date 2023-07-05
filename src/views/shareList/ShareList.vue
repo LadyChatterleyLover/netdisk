@@ -193,15 +193,17 @@ const changeRow = (row: FileItem) => {
 }
 
 const copyUrl = (row: FileItem) => {
-  const { copy } = useCopy(row.shareUrl, () => message.success('复制成功'))
+  const { copy } = useCopy(
+    `链接: ${row!.url} 提取码: ${row.extractedCode}`,
+    () => message.success('复制成功')
+  )
   copy()
 }
 
 const cancelShare = (row: FileItem) => {
   api.file
-    .updateFile({
-      id: row.id,
-      isShared: 0,
+    .cancelShare({
+      id: row.id as number,
     })
     .then((res) => {
       if (res.code === 200) {

@@ -69,7 +69,9 @@ const stopWatch = watch(
   (val) => {
     cloneFileList.value = cloneDeep(val)
     if (cloneFileList.value.length) {
-      stopWatch()
+      setTimeout(() => {
+        stopWatch()
+      })
     }
   },
   { immediate: true, deep: true }

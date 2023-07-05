@@ -13,6 +13,7 @@ export interface FileItem {
   isRename: boolean
   isShared: number
   shareUrl: string
+  extractedCode: string
   viewCount: number
   children?: FileItem[]
 }

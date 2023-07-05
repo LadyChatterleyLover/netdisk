@@ -21,6 +21,11 @@ const router = createRouter({
       component: () => import('@/views/previewDocx/PreviewDocx.vue'),
     },
     {
+      path: '/share/:code',
+      name: 'share',
+      component: () => import('@/views/share/Share.vue'),
+    },
+    {
       path: '/',
       component: Layout,
       children: [
@@ -30,8 +35,8 @@ const router = createRouter({
           component: () => import('@/views/home/Home.vue'),
         },
         {
-          path: '/share',
-          name: 'share',
+          path: '/shareList',
+          name: 'shareList',
           component: () => import('@/views/shareList/ShareList.vue'),
         },
         {

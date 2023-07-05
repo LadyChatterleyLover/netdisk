@@ -15,7 +15,7 @@
       <a-form-item label="提取码">
         <div>{{ shareData!.code }}</div>
       </a-form-item>
-      <a-form-item label=" ">
+      <a-form-item label=" " :colon="false">
         <a-button type="primary" @click="copyUrl">复制链接及提取码</a-button>
       </a-form-item>
     </a-form>
@@ -46,6 +46,11 @@
         name="extractedMethod"
         :rules="[
           { required: true, message: '请选择提取码方式', trigger: 'change' },
+          {
+            pattern: /^[a-zA-Z0-9]{4}$/,
+            message: '提取码为4位数字和字母组合',
+            trigger: 'blur',
+          },
         ]"
       >
         <a-radio-group v-model:value="model.extractedMethod">

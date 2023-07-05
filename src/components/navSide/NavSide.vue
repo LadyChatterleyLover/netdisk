@@ -27,6 +27,12 @@
       style="border-right: 1px solid #eee"
     >
       <HomeSide v-if="activeIndex === '/' || activeIndex === '/recycle'" />
+      <div
+        v-if="activeIndex === '/shareList'"
+        class="text-[#06a7ff] bg-[#eef9fe] w-[176px] ml-2 h-10 font-bold flex justify-center items-center rounded-xl"
+      >
+        分享记录
+      </div>
     </div>
   </div>
 </template>
@@ -55,7 +61,7 @@ const menuList: MenuItem[] = [
   {
     name: '分享',
     icon: 'file-outlined',
-    path: '/share',
+    path: '/shareList',
   },
   {
     name: '回收站',

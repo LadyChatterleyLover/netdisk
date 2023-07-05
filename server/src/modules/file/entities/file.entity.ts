@@ -53,6 +53,9 @@ export class File {
   size: number
 
   @Column({ default: '' })
+  extractedCode: string
+
+  @Column({ default: '' })
   deleteAt: string
 
   @Column({ default: '' })

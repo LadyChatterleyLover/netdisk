@@ -121,4 +121,19 @@ export class FileController {
       params.extractedCode,
     )
   }
+
+  @Post('cancelShare')
+  async cancelShare(@Body() params: { id: number }) {
+    return this.fileService.cancelShare(params.id)
+  }
+
+  @Post('findFileByCode')
+  async findFileByCode(@Body() params: { code: string }) {
+    return this.fileService.findFileByCode(params.code)
+  }
+
+  @Post('extractFile')
+  async extractFile(@Body() params: { urlCode: string; code: string }) {
+    return this.fileService.extractFile(params.urlCode, params.code)
+  }
 }

@@ -44,4 +44,18 @@ export default {
       url: string
     }>('/file/shareFile', params, true)
   },
+  cancelShare(params: { id: number }) {
+    return post('/file/cancelShare', params, true)
+  },
+  findFileByCode(params: { code: string }) {
+    return post<{
+      name: string
+      shareAt: string
+      username: string
+      avatar: string
+    }>('/file/findFileByCode', params, true)
+  },
+  extractFile(params: { urlCode: string; code: string }) {
+    return post('/file/extractFile', params, true)
+  },
 }

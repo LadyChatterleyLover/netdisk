@@ -11,7 +11,7 @@ import { Readable } from 'node:stream'
 import { generateRandomCode, generateUUID } from 'src/utils/generate'
 const dayjs = require('dayjs')
 
-const host = 'http://localhost:3000'
+const host = 'http://localhost:5173/share'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -375,6 +375,7 @@ export class FileService {
       shareUrl: url,
       isShared: 1,
       expirationTime: effectiveTime,
+      extractedCode: code,
     }
     const res = await this.fileRepository.save(newFile)
     if (res) {
@@ -392,20 +393,89 @@ export class FileService {
         msg: '生成分享链接失败',
       }
     }
+  }
 
-    // let expirationTime = 0
-    // let isExpiration = false
-    // if (effectiveTime !== -1) {
-    //   if (dayjs().value - currentTime < expirationTime * 1000 * 60 * 60 * 24) {
-    //     isExpiration = true
-    //     return {
-    //       code: 500,
-    //       msg: '文件已过期'
-    //     }
-    //   }
-    // }
-    // if (!isExpiration) {
+  async cancelShare(id: number) {
+    const file = await this.fileRepository.findOne({
+      where: {
+        id,
+      },
+    })
+    const newFile = {
+      ...file,
+      isShared: 0,
+      shareAt: '',
+      shareUrl: '',
+      expirationTime: 0,
+    }
+    const res = await this.fileRepository.save(newFile)
+    if (res) {
+      return {
+        code: 200,
+        msg: '取消分享成功',
+      }
+    } else {
+      return {
+        code: 500,
+        msg: '取消分享失败',
+      }
+    }
+  }
 
-    // }
+  async findFileByCode(code: string) {
+    const file = await this.fileRepository
+      .createQueryBuilder('file')
+      .leftJoinAndSelect('file.user', 'user')
+      .where({ shareUrl: `${host}/${code}` })
+      .getOne()
+    if (file) {
+      return {
+        code: 200,
+        msg: '查询成功',
+        data: {
+          name: file.name,
+          username: file.user.username,
+          avatar: file.user.avatar,
+          shareAt: file.shareAt,
+        },
+      }
+    } else {
+      return {
+        code: 500,
+        msg: '文件不存在',
+        data: null,
+      }
+    }
+  }
+  async extractFile(urlCode: string, code: string) {
+    const file = await this.fileRepository.findOne({
+      where: {
+        shareUrl: `${host}/${urlCode}`,
+      },
+    })
+    if (!file) {
+      return {
+        code: 500,
+        msg: '文件不存在',
+      }
+    }
+    const diff = dayjs().valueOf() - dayjs(file.shareAt).valueOf()
+    if (file.extractedCode !== code) {
+      return {
+        code: 500,
+        msg: '提取码不正确',
+      }
+    } else if (diff > file.expirationTime * 1000 * 60 * 60 * 24) {
+      return {
+        code: 500,
+        msg: '文件已过期',
+      }
+    } else {
+      return {
+        code: 200,
+        msg: '提取文件成功',
+        data: file,
+      }
+    }
   }
 }
