@@ -34,6 +34,18 @@ export class File {
   @Column({ default: 0 })
   dirId: number
 
+  @Column({ default: 0 })
+  expirationTime: number
+
+  @Column({ default: 0 })
+  isShared: number
+
+  @Column({ default: '' })
+  shareUrl: string
+
+  @Column({ default: 0 })
+  viewCount: 0
+
   @ManyToOne(() => User, (user) => user.files)
   user: User
 

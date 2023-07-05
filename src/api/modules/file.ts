@@ -32,4 +32,15 @@ export default {
   copyFile(params: { id: number }) {
     return post('/file/copyFile', params, true)
   },
+  shareFile(params: {
+    id: number
+    effectiveTime: number
+    extractedMethod: string
+    extractedCode?: string
+  }) {
+    return post<{
+      code: string
+      url: string
+    }>('/file/shareFile', params, true)
+  },
 }

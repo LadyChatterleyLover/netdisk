@@ -11,5 +11,8 @@ export interface FileItem {
   checked: boolean
   isAdd: boolean
   isRename: boolean
+  isShared: number
+  shareUrl: string
+  viewCount: number
   children?: FileItem[]
 }

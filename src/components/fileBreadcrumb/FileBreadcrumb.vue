@@ -31,25 +31,19 @@
 import { ref, watch } from 'vue'
 import { cloneDeep } from 'lodash-es'
 
-interface ListItem {
-  name: string
-  children: ListItem[]
-  [key: string]: any
-}
-
 const props = defineProps<{
-  fileList: ListItem[]
-  breadcrumbPaths: ListItem[]
+  fileList: any[]
+  breadcrumbPaths: any[]
 }>()
 
 const emits = defineEmits<{
-  'update:fileList': [val: ListItem[]]
-  'update:breadcrumbPaths': [val: ListItem[]]
+  'update:fileList': [val: any[]]
+  'update:breadcrumbPaths': [val: any[]]
 }>()
 
-const cloneFileList = ref<ListItem[]>([])
+const cloneFileList = ref<any[]>([])
 
-const clickBreadcrumb = (row: ListItem, index: number) => {
+const clickBreadcrumb = (row: any, index: number) => {
   if (row.children && row.children.length) {
     emits('update:fileList', cloneDeep(row.children))
     emits('update:breadcrumbPaths', props.breadcrumbPaths.slice(0, index + 1))

@@ -101,4 +101,22 @@ export class FileController {
   async copyFile(@Body() params: { id: number }, @Req() req) {
     return this.fileService.copyFile(params.id, req.user.id)
   }
+
+  @Post('shareFile')
+  async shareFile(
+    @Body()
+    params: {
+      id: number
+      effectiveTime: number
+      extractedMethod: string
+      extractedCode?: string
+    },
+  ) {
+    return this.fileService.shareFile(
+      params.id,
+      params.effectiveTime,
+      params.extractedMethod,
+      params.extractedCode,
+    )
+  }
 }

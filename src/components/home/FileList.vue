@@ -156,6 +156,7 @@
                 <share-alt-outlined
                   class="mr-3 text-sm"
                   style="color: #06a7ff"
+                  @click="shareFile(row)"
                 />
               </a-tooltip>
               <a-tooltip title="下载" placement="bottom">
@@ -260,6 +261,7 @@
       </div>
     </div>
   </div>
+  <ShareFile ref="ShareFileRef" />
 </template>
 
 <script lang="ts" setup>
@@ -281,6 +283,7 @@ import PreviewTxt from '@/components/previewTxt/PreviewTxt.vue'
 import PreviewZip from '@/components/previewZip/PreviewZip.vue'
 import MoveFile from '@/components/moveFile/MoveFile.vue'
 import FileBreadcrumb from '@/components/fileBreadcrumb/FileBreadcrumb.vue'
+import ShareFile from '@/components/shareFile/ShareFile.vue'
 import { download } from '@/utils/util'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
@@ -328,6 +331,7 @@ const PreviewAudioRef = ref()
 const PreviewTxtRef = ref()
 const PreviewZipRef = ref()
 const MoveFileRef = ref()
+const ShareFileRef = ref()
 const inputRef = ref<HTMLInputElement>()
 const tableData = ref<FileItem[]>([])
 const breadcrumbPaths = ref<FileItem[]>([])
@@ -401,6 +405,10 @@ const addDir = () => {
     ext: '',
     url: '',
     isAdd: true,
+    isRename: false,
+    isShared: 0,
+    shareUrl: '',
+    viewCount: 0,
   })
   setTimeout(() => {
     setInputFocus()
@@ -505,6 +513,14 @@ const viewZip = async (row: FileItem) => {
 
 const downloadFile = (url: string) => {
   download(url)
+}
+
+const shareFile = (row: FileItem) => {
+  if (row.isShared === 1) {
+    message.warning('该文件已经分享过了,请在分享列表查看')
+    return
+  }
+  ShareFileRef.value?.open(row)
 }
 
 const delFile = (row: FileItem) => {

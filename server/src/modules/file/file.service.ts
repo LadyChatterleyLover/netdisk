@@ -8,7 +8,10 @@ import { UploadFile } from './dto/file.dto'
 import { User } from '../user/entities/user.entity'
 import { ConfigService } from '@nestjs/config'
 import { Readable } from 'node:stream'
+import { generateRandomCode, generateUUID } from 'src/utils/generate'
 const dayjs = require('dayjs')
+
+const host = 'http://localhost:3000'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
 const videoType = ['mp4', 'ogg', 'flv', 'avi', 'wmv', 'rmvb', 'mov']
@@ -328,5 +331,74 @@ export class FileService {
         msg: '复制成功',
       }
     }
+  }
+
+  async shareFile(
+    id: number,
+    effectiveTime: number,
+    extractedMethod: string,
+    extractedCode?: string,
+  ) {
+    const file = await this.fileRepository.findOne({
+      where: {
+        id,
+      },
+    })
+    if (!file) {
+      return {
+        code: 500,
+        msg: '文件不存在',
+      }
+    }
+    let code = ''
+    if (extractedMethod === 'custom') {
+      if (!extractedCode) {
+        return {
+          code: 500,
+          msg: '自定义提取码不能为空',
+        }
+      }
+    }
+    if (extractedMethod === 'system') {
+      code = generateRandomCode()
+    }
+    const url = `${host}/${generateUUID()}`
+    const newFile = {
+      ...file,
+      shareUrl: url,
+      isShared: 1,
+      expirationTime: effectiveTime,
+    }
+    const res = await this.fileRepository.save(newFile)
+    if (res) {
+      return {
+        code: 200,
+        msg: '生成分享链接成功',
+        data: {
+          code,
+          url,
+        },
+      }
+    } else {
+      return {
+        code: 500,
+        msg: '生成分享链接失败',
+      }
+    }
+
+    // let expirationTime = 0
+    // let isExpiration = false
+    // if (effectiveTime !== -1) {
+    //   if (dayjs().value - currentTime < expirationTime * 1000 * 60 * 60 * 24) {
+    //     isExpiration = true
+    //     return {
+    //       code: 500,
+    //       msg: '文件已过期'
+    //     }
+    //   }
+    // }
+    // if (!isExpiration) {
+
+    // }
   }
 }
