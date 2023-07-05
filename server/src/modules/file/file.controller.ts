@@ -55,6 +55,7 @@ export class FileController {
       dirId: number
       isDir: boolean
       isRecovery: boolean
+      isShared: boolean
     },
     @Req() req,
   ) {
@@ -65,6 +66,7 @@ export class FileController {
       params.dirId,
       params.isDir,
       params.isRecovery,
+      params.isShared,
     )
   }
 

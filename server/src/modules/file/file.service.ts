@@ -166,6 +166,7 @@ export class FileService {
     dirId: number,
     isDir?: boolean,
     isRecovery?: boolean,
+    isShared?: boolean,
   ) {
     const query = this.fileRepository
       .createQueryBuilder('file')
@@ -189,6 +190,11 @@ export class FileService {
       query.andWhere({ isRecovery: 1 })
     } else {
       query.andWhere({ isRecovery: 0 })
+    }
+    if (isShared) {
+      query.andWhere({ isShared: 1 })
+    } else {
+      query.andWhere({ isShared: 0 })
     }
 
     query.orderBy('file.isDir', 'DESC')
@@ -365,6 +371,7 @@ export class FileService {
     const url = `${host}/${generateUUID()}`
     const newFile = {
       ...file,
+      shareAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       shareUrl: url,
       isShared: 1,
       expirationTime: effectiveTime,

@@ -10,7 +10,8 @@ export default {
     type?: string
     dirId?: number
     isDir?: number
-    isRecovery?: number
+    isRecovery?: boolean
+    isShared?: boolean
   }) {
     return post<FileItem[]>('/file', params, true)
   },

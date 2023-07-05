@@ -55,6 +55,9 @@ export class File {
   @Column({ default: '' })
   deleteAt: string
 
+  @Column({ default: '' })
+  shareAt: string
+
   @CreateDateColumn()
   createAt: Date
 

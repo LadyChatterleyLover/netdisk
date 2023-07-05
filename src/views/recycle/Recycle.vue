@@ -178,7 +178,7 @@ const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
 const getFileList = () => {
   api.file
     .getFileList({
-      isRecovery: 1,
+      isRecovery: true,
     })
     .then((res) => {
       fileStore.setFileList(res.data)

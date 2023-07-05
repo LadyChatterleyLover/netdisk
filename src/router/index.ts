@@ -30,6 +30,11 @@ const router = createRouter({
           component: () => import('@/views/home/Home.vue'),
         },
         {
+          path: '/share',
+          name: 'share',
+          component: () => import('@/views/shareList/ShareList.vue'),
+        },
+        {
           path: '/recycle',
           name: 'recycle',
           component: () => import('@/views/recycle/Recycle.vue'),
