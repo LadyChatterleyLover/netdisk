@@ -471,6 +471,11 @@ export class FileService {
         msg: '文件已过期',
       }
     } else {
+      const newFile = {
+        ...file,
+        viewCount: file.viewCount + 1,
+      }
+      await this.fileRepository.save(newFile)
       return {
         code: 200,
         msg: '提取文件成功',

@@ -194,7 +194,7 @@ const changeRow = (row: FileItem) => {
 
 const copyUrl = (row: FileItem) => {
   const { copy } = useCopy(
-    `链接: ${row!.url} 提取码: ${row.extractedCode}`,
+    `链接: ${row!.shareUrl} 提取码: ${row.extractedCode}`,
     () => message.success('复制成功')
   )
   copy()
