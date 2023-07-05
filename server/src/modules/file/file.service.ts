@@ -3,11 +3,11 @@ import * as OSS from 'ali-oss'
 import { InjectRepository } from '@nestjs/typeorm'
 import { File } from './entities/file.entity'
 import { Repository } from 'typeorm'
-import { UploadFile } from './dto/file.dto'
 import { User } from '../user/entities/user.entity'
 import { ConfigService } from '@nestjs/config'
-import { Readable } from 'node:stream'
 import { generateRandomCode, generateUUID } from 'src/utils/generate'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 const dayjs = require('dayjs')
 
 const host = 'http://localhost:5173/share'
@@ -28,7 +28,7 @@ const audioType = [
 
 @Injectable()
 export class FileService {
-  public client
+  public client: OSS
   constructor(
     @InjectRepository(File) private readonly fileRepository: Repository<File>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
@@ -42,12 +42,7 @@ export class FileService {
     })
   }
 
-  async upload(
-    files: UploadFile[],
-    stream: Readable,
-    user_id: number,
-    dirId: number,
-  ) {
+  async upload(files: Express.Multer.File[], user_id: number, dirId: number) {
     const file = files[0]
     const size = file.size
     const ext = file.mimetype.split('/')[1]
@@ -78,7 +73,7 @@ export class FileService {
         'YYYYMMDD',
       )}_${dayjs().format('HHmmss')}.${ext}`
     }
-    const url = await this.uploadFile(filename, stream)
+    const url = await this.uploadFile(file)
     const user = await this.userRepository.findOne({
       where: {
         id: user_id,
@@ -107,17 +102,46 @@ export class FileService {
     }
   }
 
-  async uploadFile(name: string, stream: Readable) {
-    let res
-    try {
-      res = await this.client.putStream(name, stream)
-      // 将文件设置为公共可读
-      await this.client.putACL(name, 'public-read')
-    } catch (error) {
-      console.log(error)
+  async uploadFile(file: Express.Multer.File) {
+    const filename = decodeURI(escape(file.originalname))
+    const tempFolderPath = path.resolve(__dirname, '..', 'temp')
+    if (!fs.existsSync(tempFolderPath)) {
+      fs.mkdirSync(tempFolderPath)
     }
-    return res.url
+    const tempFilePath = path.resolve(tempFolderPath, filename)
+    fs.writeFileSync(tempFilePath, file.buffer)
+
+    const filePath = path.resolve(__dirname, '..', 'temp', filename)
+    const result = await this.client.multipartUpload(filename, filePath, {
+      progress: (p) => {
+        console.log(`Upload progress: ${p}`)
+      },
+      headers: {
+        'Cache-Control': 'public, max-age=31536000',
+      },
+      timeout: 60 * 1000,
+      partSize: 5 * 1024 * 1024,
+    })
+    fs.unlinkSync(filePath) // 删除临时文件
+    return (result.res as any).requestUrls[0].split('?')[0]
   }
+
+  async initMultipartUpload(fileName: string): Promise<string> {
+    const result = await this.client.initMultipartUpload(fileName)
+    return result.uploadId
+  }
+
+  // async uploadFile(name: string, stream: Readable) {
+  //   let res
+  //   try {
+  //     res = await this.client.putStream(name, stream)
+  //     // 将文件设置为公共可读
+  //     await this.client.putACL(name, 'public-read')
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  //   return res.url
+  // }
 
   async createDir(name: string, user_id: number, dirId = 0) {
     const user = await this.userRepository.findOne({
@@ -447,6 +471,7 @@ export class FileService {
     }
   }
 
+  // 提取文件
   async extractFile(urlCode: string, code: string) {
     const file = await this.fileRepository.findOne({
       where: {

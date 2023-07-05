@@ -113,7 +113,8 @@ const getFileList = (
     type?: string
     dirId?: number
     isDir?: number
-    isRecovery?: number
+    isRecovery?: boolean
+    isShared?: boolean
   },
   row?: FileItem
 ) => {
@@ -175,6 +176,11 @@ const addDir = () => {
     ext: '',
     url: '',
     isAdd: true,
+    isRename: false,
+    isShared: 0,
+    extractedCode: '',
+    viewCount: 0,
+    shareUrl: '',
   })
   fileListRef.value?.setInputFocus()
 }
