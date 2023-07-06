@@ -78,10 +78,11 @@
       v-model:select-data="selectList"
     />
   </div>
+  <UploadProgress ref="UploadProgressRef" :upload-progress="uploadProgress" />
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, watch, watchEffect } from 'vue'
+import { computed, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
@@ -95,6 +96,7 @@ import type {
 } from 'ant-design-vue/es/vc-upload/interface'
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
+import UploadProgress from '@/components/uploadProgress/UploadProgress.vue'
 import { useFileStore } from '@/stores/file'
 
 const socket = io('http://localhost:3000', {
@@ -113,6 +115,7 @@ const category = ref('')
 const value = ref('')
 const loading = ref(false)
 const uploadProgress = ref(0)
+const UploadProgressRef = ref()
 
 const getFileList = (
   params?: {
@@ -149,6 +152,7 @@ const handleCustomRequest = (
   type: string
 ) => {
   const { file } = options
+  UploadProgressRef.value?.open(file)
   if (type === 'file') {
     const formData = new FormData()
     formData.append('file', file)
