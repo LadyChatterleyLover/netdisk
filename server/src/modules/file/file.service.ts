@@ -47,7 +47,7 @@ export class FileService {
     this.uploadId = null
   }
 
-  async upload(files: Express.Multer.File[], user_id: number, dirId: number) {
+  async upload(files: Express.Multer.File[], user_id: number, dirId = 0) {
     const file = files[0]
     const size = file.size
     const ext = file.mimetype.split('/')[1]
@@ -87,13 +87,25 @@ export class FileService {
         id: user_id,
       },
     })
+    const remainingMemory = Number(user.memory) - file.size
+    if (remainingMemory < 0) {
+      return {
+        code: 500,
+        msg: '内存不足',
+      }
+    }
+    const newUser = {
+      ...user,
+      remainingMemory: String(remainingMemory),
+    }
+    await this.userRepository.save(newUser)
     const res = await this.fileRepository.save({
       name: filename,
       size,
       ext,
       url,
-      user,
-      dirId,
+      user: newUser,
+      dirId: dirId || 0,
       type,
     })
     if (res) {

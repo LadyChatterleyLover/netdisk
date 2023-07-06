@@ -7,6 +7,8 @@ export const useFormatFileSize = (size: number) => {
     return `${(size / 1024 / 1024).toFixed(2)}M`
   } else if (size >= 1024 && size < 1024 * 1024 * 1024 * 1024) {
     return `${(size / 1024 / 1024 / 1024).toFixed(2)}G`
+  } else if (size >= 1024 && size < 1024 * 1024 * 1024 * 1024 * 1024) {
+    return `${(size / 1024 / 1024 / 1024).toFixed(0)}T`
   }
   return size
 }

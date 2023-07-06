@@ -93,6 +93,7 @@ import dayjs from 'dayjs'
 import JSZip from 'jszip'
 import FileSaver from 'file-saver'
 import io from 'socket.io-client'
+import { useUserStore } from '../../stores/user'
 import type { FileItem } from '@/types/file'
 import type {
   RcFile,
@@ -108,6 +109,8 @@ const socket = io('http://localhost:3000', {
   transports: ['websocket'],
   secure: true,
 })
+
+const userStore = useUserStore()
 const route = useRoute()
 const fileStore = useFileStore()
 const fileList = computed(() => fileStore.fileList)
@@ -161,6 +164,7 @@ const upload = (file: RcFile) => {
       if (res.code === 200) {
         message.success(res.msg)
         getFileList()
+        userStore.setUser(res.data.user!)
       } else {
         message.error(res.msg)
       }

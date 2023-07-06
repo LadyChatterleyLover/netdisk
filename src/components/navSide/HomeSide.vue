@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full px-4">
+  <div class="w-full px-4 relative">
     <div
       class="w-full h-10 flex justify-around items-center cursor-pointer"
       :class="{ active: activeIndex === 0 }"

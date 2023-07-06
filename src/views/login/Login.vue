@@ -234,16 +234,18 @@
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '../../stores/user'
 import type { FormInstance } from 'ant-design-vue'
 import type { Rule } from 'ant-design-vue/lib/form'
 import api from '@/api'
 import { localSet } from '@/utils/util'
 
 const router = useRouter()
+const userStore = useUserStore()
+
 const isLogin = ref(true)
 const forget = ref(false)
 const canFind = ref(false)
-
 const formRef = ref<FormInstance>()
 const forgetFormRef = ref<FormInstance>()
 const updateFormRef = ref<FormInstance>()
@@ -375,6 +377,7 @@ const login = () => {
             if (token) {
               localSet('disk-token', token)
               localSet('disk-user', res.data.user)
+              userStore.setUser(res.data.user)
               message.success('登录成功！')
               router.push('/')
             }

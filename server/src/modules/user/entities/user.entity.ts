@@ -28,6 +28,12 @@ export class User {
   @Column({ default: '' })
   avatar: string
 
+  @Column({ default: '10737418240' })
+  memory: string
+
+  @Column({ default: '10737418240' })
+  remainingMemory: string
+
   @OneToMany(() => File, (file) => file.user)
   files: File[]
 

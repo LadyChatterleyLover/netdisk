@@ -23,7 +23,7 @@
       </div>
     </div>
     <div
-      class="w-[200px] py-8 flex flex-col items-center"
+      class="w-[200px] py-8 flex flex-col items-center relative"
       style="border-right: 1px solid #eee"
     >
       <HomeSide v-if="activeIndex === '/' || activeIndex === '/recycle'" />
@@ -33,13 +33,25 @@
       >
         分享记录
       </div>
+      <div
+        class="absolute left-1/2 bottom-[20%] w-full px-5"
+        style="transform: translateX(-50%)"
+      >
+        <a-progress :percent="50" :show-info="false" />
+        <div class="mt-5 flex justify-center">
+          {{ useFormatFileSize(Number(user?.remainingMemory)) }} /
+          {{ useFormatFileSize(Number(user?.memory)) }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '../../stores/user'
+import { useFormatFileSize } from '../../hooks/useFormatFileSize/index'
 import HomeSide from './HomeSide.vue'
 
 interface MenuItem {
@@ -48,8 +60,11 @@ interface MenuItem {
   path: string
 }
 
+const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
+
+const user = computed(() => userStore.user)
 const activeIndex = ref(route.path)
 
 const menuList: MenuItem[] = [

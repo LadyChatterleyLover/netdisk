@@ -1,3 +1,5 @@
+import type { UserInfo } from './user'
+
 export interface FileItem {
   id?: number
   name: string
@@ -16,4 +18,5 @@ export interface FileItem {
   extractedCode: string
   viewCount: number
   children?: FileItem[]
+  user?: UserInfo
 }

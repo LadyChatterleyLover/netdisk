@@ -262,18 +262,26 @@
     </div>
   </div>
   <ShareFile ref="ShareFileRef" />
+  <UploadProgress
+    ref="UploadProgressRef"
+    :upload-progress="uploadProgress"
+    :upload="upload"
+  />
 </template>
 
 <script lang="ts" setup>
-import { createVNode, inject, nextTick, ref, watch } from 'vue'
+import { createVNode, inject, nextTick, onMounted, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { cloneDeep } from 'lodash-es'
 import { Modal, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import io from 'socket.io-client'
 import api from '../../api'
+import { useUserStore } from '../../stores/user'
 import type { UploadProps } from 'ant-design-vue'
+import type { RcFile } from 'ant-design-vue/es/vc-upload/interface'
 import type { VxeColumnPropTypes } from 'vxe-table'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
@@ -284,6 +292,7 @@ import PreviewZip from '@/components/previewZip/PreviewZip.vue'
 import MoveFile from '@/components/moveFile/MoveFile.vue'
 import FileBreadcrumb from '@/components/fileBreadcrumb/FileBreadcrumb.vue'
 import ShareFile from '@/components/shareFile/ShareFile.vue'
+import UploadProgress from '@/components/uploadProgress/UploadProgress.vue'
 import { download } from '@/utils/util'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
@@ -299,6 +308,12 @@ const audioType = [
   'ape',
   'wv',
 ]
+
+const socket = io('http://localhost:3000', {
+  path: '/socket',
+  transports: ['websocket'],
+  secure: true,
+})
 
 const getFileList = inject<
   (
@@ -322,6 +337,7 @@ const emits = defineEmits<{
   'update:selectData': [val: FileItem[]]
 }>()
 
+const userStore = useUserStore()
 const router = useRouter()
 
 const indeterminate = ref(false)
@@ -332,12 +348,14 @@ const PreviewTxtRef = ref()
 const PreviewZipRef = ref()
 const MoveFileRef = ref()
 const ShareFileRef = ref()
+const UploadProgressRef = ref()
 const inputRef = ref<HTMLInputElement>()
 const tableData = ref<FileItem[]>([])
 const breadcrumbPaths = ref<FileItem[]>([])
 const checkAll = ref(false)
 const activeItem = ref<FileItem>()
 const cancelItem = ref<FileItem>()
+const uploadProgress = ref(0)
 
 const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
   cellValue,
@@ -416,8 +434,7 @@ const addDir = () => {
   }, 100)
 }
 
-const handleCustomRequest: UploadProps['customRequest'] = (options) => {
-  const { file } = options
+const upload = (file: RcFile) => {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('dirId', activeItem.value ? String(activeItem.value.id) : '')
@@ -427,10 +444,17 @@ const handleCustomRequest: UploadProps['customRequest'] = (options) => {
       getFileList?.({
         dirId: activeItem.value?.id,
       })
+      userStore.setUser(res.data.user!)
     } else {
       message.error(res.msg)
     }
   })
+}
+
+const handleCustomRequest: UploadProps['customRequest'] = (options) => {
+  const { file } = options
+  UploadProgressRef.value?.open(file)
+  upload(file as RcFile)
 }
 
 const clickItem = (row: FileItem) => {
@@ -627,6 +651,12 @@ watch(
   },
   { deep: true }
 )
+
+onMounted(() => {
+  socket.on('uploadProgress', (data: number) => {
+    uploadProgress.value = data
+  })
+})
 
 defineExpose({
   setInputFocus,
