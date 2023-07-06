@@ -30,6 +30,7 @@ const audioType = [
 @Injectable()
 export class FileService {
   public client: OSS
+  public uploadId: string | null
 
   constructor(
     private readonly uploadGateway: UploadGateway,
@@ -43,6 +44,7 @@ export class FileService {
       accessKeySecret: this.configService.get('OSS_ACCESSKEYSECRET'),
       bucket: this.configService.get('OSS_BUCKET'),
     })
+    this.uploadId = null
   }
 
   async upload(files: Express.Multer.File[], user_id: number, dirId: number) {
@@ -77,6 +79,9 @@ export class FileService {
       )}_${dayjs().format('HHmmss')}.${ext}`
     }
     const url = await this.uploadFile(file)
+    if (!url) {
+      return
+    }
     const user = await this.userRepository.findOne({
       where: {
         id: user_id,
@@ -113,21 +118,44 @@ export class FileService {
     }
     const tempFilePath = path.resolve(tempFolderPath, filename)
     fs.writeFileSync(tempFilePath, file.buffer)
-
     const filePath = path.resolve(__dirname, '..', 'temp', filename)
-    const result = await this.client.multipartUpload(filename, filePath, {
-      progress: (p) => {
-        const progressPercentage = Math.round(p * 100)
-        this.uploadGateway.sendUploadProgress(progressPercentage)
-      },
-      headers: {
-        'Cache-Control': 'public, max-age=31536000',
-      },
-      timeout: 60 * 1000,
-      partSize: 5 * 1024 * 1024,
-    })
-    fs.unlinkSync(filePath) // 删除临时文件
-    return (result.res as any).requestUrls[0].split('?')[0]
+    try {
+      await this.cancelUpload(filename)
+      this.uploadId = await this.initMultipartUpload(filename)
+      const result = await this.client.multipartUpload(filename, filePath, {
+        progress: (p) => {
+          const progressPercentage = Math.round(p * 100)
+          this.uploadGateway.sendUploadProgress(progressPercentage)
+        },
+        headers: {
+          'Cache-Control': 'public, max-age=31536000',
+        },
+        timeout: 60 * 1000,
+        partSize: 1024 * 1024,
+      })
+      fs.unlinkSync(filePath)
+      this.uploadId = null
+      return (result.res as any).requestUrls[0].split('?')[0]
+    } catch (e) {
+      console.log('err', e)
+    }
+  }
+
+  async cancelUpload(name: string) {
+    try {
+      if (!this.uploadId) {
+        return
+      }
+      const { uploads } = await this.client.listUploads({ prefix: name })
+      // 遍历并取消分片上传
+      for (const upload of uploads) {
+        await this.client.abortMultipartUpload(name, upload.uploadId)
+      }
+      // 重置 uploadId
+      this.uploadId = null
+    } catch (error) {
+      console.error('Failed to cancel multipart upload:', error)
+    }
   }
 
   async initMultipartUpload(fileName: string): Promise<string> {

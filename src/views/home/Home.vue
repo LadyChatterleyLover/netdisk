@@ -78,7 +78,11 @@
       v-model:select-data="selectList"
     />
   </div>
-  <UploadProgress ref="UploadProgressRef" :upload-progress="uploadProgress" />
+  <UploadProgress
+    ref="UploadProgressRef"
+    :upload-progress="uploadProgress"
+    :upload="upload"
+  />
 </template>
 
 <script setup lang="ts">
@@ -147,6 +151,26 @@ const onSearch = (val: string) => {
   })
 }
 
+const upload = (file: RcFile) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  loading.value = true
+  api.file
+    .uploadFile(formData)
+    .then((res) => {
+      if (res.code === 200) {
+        message.success(res.msg)
+        getFileList()
+      } else {
+        message.error(res.msg)
+      }
+      loading.value = false
+    })
+    .catch(() => {
+      loading.value = false
+    })
+}
+
 const handleCustomRequest = (
   options: UploadRequestOption<any>,
   type: string
@@ -154,23 +178,7 @@ const handleCustomRequest = (
   const { file } = options
   UploadProgressRef.value?.open(file)
   if (type === 'file') {
-    const formData = new FormData()
-    formData.append('file', file)
-    loading.value = true
-    api.file
-      .uploadFile(formData)
-      .then((res) => {
-        if (res.code === 200) {
-          message.success(res.msg)
-          getFileList()
-        } else {
-          message.error(res.msg)
-        }
-        loading.value = false
-      })
-      .catch(() => {
-        loading.value = false
-      })
+    upload(file as RcFile)
   } else {
     uploadFileList.value.push(file as RcFile)
   }

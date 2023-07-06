@@ -45,6 +45,11 @@ export class FileController {
     return this.fileService.upload(file, req.user.id, params.dirId)
   }
 
+  @Post('cancelUpload')
+  async cancelUpload(@Body() params: { name: string }) {
+    return this.fileService.cancelUpload(params.name)
+  }
+
   @Post()
   async findAll(
     @Body()

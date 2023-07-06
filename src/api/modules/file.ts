@@ -62,4 +62,7 @@ export default {
   extractFile(params: { urlCode: string; code: string }) {
     return post<FileItem>('/file/extractFile', params, true)
   },
+  cancelUpload(params: { name: string }) {
+    return post('/file/cancelUpload', params, true)
+  },
 }

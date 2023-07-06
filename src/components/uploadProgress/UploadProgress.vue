@@ -54,6 +54,24 @@
           {{ useFormatFileSize(current?.size) }}
         </div>
       </div>
+      <div v-if="progress > 0 && progress < 100" class="flex items-center">
+        <a-tooltip placement="bottomLeft" title="取消">
+          <div
+            class="w-[28px] h-[28px] bg-[#f0faff] rounded-full cursor-pointer ml-3 flex justify-center items-center"
+          >
+            <redo-outlined
+              v-if="canceled"
+              style="color: #06a7ff"
+              @click="reupload"
+            />
+            <close-outlined
+              v-else
+              style="color: #06a7ff"
+              @click="cancelUpload"
+            />
+          </div>
+        </a-tooltip>
+      </div>
     </div>
     <a-divider />
     <div class="w-full flex justify-center text-[#afb3bf] text-xs">
@@ -64,6 +82,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import api from '../../api'
+import type { RcFile } from 'ant-design-vue/es/vc-upload/interface'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
 
 const imgType = ['bmp', 'jpg', 'jpeg', 'png', 'gif']
@@ -82,11 +102,25 @@ const audioType = [
 
 const props = defineProps<{
   uploadProgress: number
+  upload: (file: RcFile) => void
 }>()
 
 const progress = ref(0)
 const visible = ref(false)
 const current = ref<File & { ext: string }>()
+const canceled = ref(false)
+
+const reupload = () => {
+  canceled.value = false
+  props.upload(current.value as any)
+}
+
+const cancelUpload = () => {
+  canceled.value = true
+  api.file.cancelUpload({
+    name: current.value?.name as string,
+  })
+}
 
 const open = (file: File & { ext: string }) => {
   current.value = file
