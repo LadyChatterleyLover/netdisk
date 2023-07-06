@@ -1,9 +1,13 @@
 import { post } from '../request'
+import type { AxiosProgressEvent } from 'axios'
 import type { FileItem } from '@/types/file'
 
 export default {
-  uploadFile(params: any) {
-    return post<FileItem>('/file/upload', params, false, true)
+  uploadFile(
+    params: any,
+    onUploadProgress?: (progress: AxiosProgressEvent) => void
+  ) {
+    return post<FileItem>('/file/upload', params, false, true, onUploadProgress)
   },
   getFileList(params?: {
     name?: string

@@ -17,6 +17,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { UserModule } from './modules/user/user.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { FileModule } from './modules/file/file.module'
+import { UploadGateway } from './modules/gateway/upload.gateway'
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { FileModule } from './modules/file/file.module'
   controllers: [AppController],
   providers: [
     AppService,
+    UploadGateway,
     // {
     //   provide: APP_FILTER,
     //   useClass: UnifyExceptionFilter,

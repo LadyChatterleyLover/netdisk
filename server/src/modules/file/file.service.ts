@@ -6,6 +6,7 @@ import { Repository } from 'typeorm'
 import { User } from '../user/entities/user.entity'
 import { ConfigService } from '@nestjs/config'
 import { generateRandomCode, generateUUID } from 'src/utils/generate'
+import { UploadGateway } from '../gateway/upload.gateway'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 const dayjs = require('dayjs')
@@ -29,7 +30,9 @@ const audioType = [
 @Injectable()
 export class FileService {
   public client: OSS
+
   constructor(
+    private readonly uploadGateway: UploadGateway,
     @InjectRepository(File) private readonly fileRepository: Repository<File>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
@@ -114,7 +117,8 @@ export class FileService {
     const filePath = path.resolve(__dirname, '..', 'temp', filename)
     const result = await this.client.multipartUpload(filename, filePath, {
       progress: (p) => {
-        console.log(`Upload progress: ${p}`)
+        const progressPercentage = Math.round(p * 100)
+        this.uploadGateway.sendUploadProgress(progressPercentage)
       },
       headers: {
         'Cache-Control': 'public, max-age=31536000',
@@ -130,18 +134,6 @@ export class FileService {
     const result = await this.client.initMultipartUpload(fileName)
     return result.uploadId
   }
-
-  // async uploadFile(name: string, stream: Readable) {
-  //   let res
-  //   try {
-  //     res = await this.client.putStream(name, stream)
-  //     // 将文件设置为公共可读
-  //     await this.client.putACL(name, 'public-read')
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  //   return res.url
-  // }
 
   async createDir(name: string, user_id: number, dirId = 0) {
     const user = await this.userRepository.findOne({

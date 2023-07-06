@@ -2,7 +2,7 @@ import axios from 'axios'
 import { message } from 'ant-design-vue'
 import { localGet, localRemove } from '../utils/util'
 import router from '../router/index'
-import type { Method } from 'axios'
+import type { AxiosProgressEvent, Method } from 'axios'
 let isToken = true
 
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL
@@ -230,13 +230,13 @@ const request = <T>(
   params: any,
   method: Method,
   isJson = false,
-  isFromData = true
+  isFromData = true,
+  onUploadProgress?: (progress: AxiosProgressEvent) => void
 ): Promise<IResponseData<T>> => {
   return new Promise((resolve, reject) => {
     if (method == 'post' || method == 'put' || method == 'delete') {
-      axios({
+      axios(url, {
         method,
-        url,
         data: params,
         transformRequest: [
           function (data) {
@@ -263,6 +263,7 @@ const request = <T>(
               ? 'multipart/form-data'
               : 'application/x-www-form-urlencoded',
         },
+        onUploadProgress,
       })
         .then((res) => {
           if (res && res.data) {
@@ -371,9 +372,10 @@ export function post<T>(
   url: string,
   params: any,
   isJson = false,
-  isFromData = false
+  isFromData = false,
+  onUploadProgress?: (progress: AxiosProgressEvent) => void
 ) {
-  return request<T>(url, params, 'post', isJson, isFromData)
+  return request<T>(url, params, 'post', isJson, isFromData, onUploadProgress)
 }
 
 /**

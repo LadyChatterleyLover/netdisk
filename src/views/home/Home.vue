@@ -81,12 +81,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, provide, ref, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import JSZip from 'jszip'
 import FileSaver from 'file-saver'
+import io from 'socket.io-client'
 import type { FileItem } from '@/types/file'
 import type {
   RcFile,
@@ -96,6 +97,11 @@ import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
 import { useFileStore } from '@/stores/file'
 
+const socket = io('http://localhost:3000', {
+  path: '/socket',
+  transports: ['websocket'],
+  secure: true,
+})
 const route = useRoute()
 const fileStore = useFileStore()
 const fileList = computed(() => fileStore.fileList)
@@ -106,6 +112,7 @@ const fileListRef = ref()
 const category = ref('')
 const value = ref('')
 const loading = ref(false)
+const uploadProgress = ref(0)
 
 const getFileList = (
   params?: {
@@ -261,5 +268,8 @@ watch(
 
 onMounted(() => {
   getFileList()
+  socket.on('uploadProgress', (data: number) => {
+    uploadProgress.value = data
+  })
 })
 </script>
