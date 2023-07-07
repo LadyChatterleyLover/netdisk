@@ -80,7 +80,7 @@
           <div class="ml-2 font-bold">删除</div>
         </div>
         <a-divider type="vertical" />
-        <div class="flex h-full items-center">
+        <div class="flex h-full items-center" @click="copyFiles">
           <copy-outlined class="text-sm" />
           <div class="ml-2 font-bold">复制</div>
         </div>
@@ -281,6 +281,23 @@ const addFileToZip = async (zip: JSZip, url: string) => {
 
 const moveFiles = () => {
   MoveFileRef.value?.open(selectList.value)
+}
+
+const copyFiles = () => {
+  const ids = selectList.value.map((item) => item.id) as number[]
+  const arr = ids.map((item) => {
+    return api.file.copyFile({
+      id: item,
+    })
+  })
+  Promise.all(arr)
+    .then(() => {
+      message.success('复制成功')
+      getFileList()
+    })
+    .catch(() => {
+      message.error('复制失败')
+    })
 }
 
 const deleteFile = () => {
