@@ -414,7 +414,7 @@ const clickMenu = (row: FileItem, { key }: { key: string }) => {
       })
   }
   if (key === '3') {
-    MoveFileRef.value?.open(row)
+    MoveFileRef.value?.open([row])
   }
 }
 

@@ -70,12 +70,12 @@
           <div class="ml-2 font-bold">分享</div>
         </div>
         <a-divider type="vertical" />
-        <div class="flex h-full items-center">
+        <div class="flex h-full items-center" @click="downloadFile">
           <download-outlined class="text-sm" />
           <div class="ml-2 font-bold">下载</div>
         </div>
         <a-divider type="vertical" />
-        <div class="flex h-full items-center">
+        <div class="flex h-full items-center" @click="deleteFile">
           <delete-outlined class="text-sm" />
           <div class="ml-2 font-bold">删除</div>
         </div>
@@ -90,7 +90,7 @@
           <div class="ml-2 font-bold">重命名</div>
         </div>
         <a-divider type="vertical" />
-        <div class="flex h-full items-center">
+        <div class="flex h-full items-center" @click="moveFiles">
           <drag-outlined class="text-sm" />
           <div class="ml-2 font-bold">移动</div>
         </div>
@@ -119,16 +119,18 @@
     :upload-progress="uploadProgress"
     :upload="upload"
   />
+  <MoveFile ref="MoveFileRef" />
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, watch } from 'vue'
+import { computed, createVNode, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { message } from 'ant-design-vue'
+import { Modal, message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import JSZip from 'jszip'
 import FileSaver from 'file-saver'
 import io from 'socket.io-client'
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { useUserStore } from '../../stores/user'
 import type { FileItem } from '@/types/file'
 import type {
@@ -137,8 +139,10 @@ import type {
 } from 'ant-design-vue/es/vc-upload/interface'
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
+import MoveFile from '@/components/moveFile/MoveFile.vue'
 import UploadProgress from '@/components/uploadProgress/UploadProgress.vue'
 import { useFileStore } from '@/stores/file'
+import { download } from '@/utils/util'
 
 const socket = io('http://localhost:3000', {
   path: '/socket',
@@ -151,6 +155,7 @@ const route = useRoute()
 const fileStore = useFileStore()
 const fileList = computed(() => fileStore.fileList)
 
+const MoveFileRef = ref()
 const selectList = ref<FileItem[]>([])
 const uploadFileList = ref<RcFile[]>([])
 const fileListRef = ref()
@@ -256,11 +261,15 @@ const downloadFile = async () => {
     return
   }
   selectList.value = selectList.value.filter((item) => !item.isDir)
-  const zip = new JSZip()
-  const fileUrls = selectList.value.map((item) => item.url)
-  await Promise.all(fileUrls.map((url) => addFileToZip(zip, url)))
-  const zipBlob = await zip.generateAsync({ type: 'blob' })
-  FileSaver.saveAs(zipBlob, `【批量下载】${selectList.value[0].name}等.zip`)
+  if (selectList.value.length === 1) {
+    download(selectList.value[0].url)
+  } else {
+    const zip = new JSZip()
+    const fileUrls = selectList.value.map((item) => item.url)
+    await Promise.all(fileUrls.map((url) => addFileToZip(zip, url)))
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    FileSaver.saveAs(zipBlob, `【批量下载】${selectList.value[0].name}等.zip`)
+  }
 }
 
 const addFileToZip = async (zip: JSZip, url: string) => {
@@ -268,6 +277,36 @@ const addFileToZip = async (zip: JSZip, url: string) => {
   const blob = await response.blob()
   const filename = url.slice(Math.max(0, url.lastIndexOf('/') + 1))
   zip.file(window.decodeURIComponent(filename), blob)
+}
+
+const moveFiles = () => {
+  MoveFileRef.value?.open(selectList.value)
+}
+
+const deleteFile = () => {
+  const ids = selectList.value.map((item) => item.id) as number[]
+  Modal.confirm({
+    icon: createVNode(ExclamationCircleOutlined),
+    content: createVNode('div', { style: { fontSize: '16px' } }, [
+      '确定删除所选的文件吗？',
+      createVNode(
+        'div',
+        { style: { color: '#ca963b', marginLeft: '38px', marginTop: '10px' } },
+        '删除的文件可在回收站查看'
+      ),
+    ]),
+    okText: '删除',
+    onOk() {
+      api.file.recoveryFile(ids).then((res) => {
+        if (res.code === 200) {
+          message.success(res.msg)
+          getFileList()
+        } else {
+          message.error(res.msg)
+        }
+      })
+    },
+  })
 }
 
 provide('getFileList', getFileList)

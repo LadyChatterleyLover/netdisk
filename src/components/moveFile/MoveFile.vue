@@ -16,14 +16,16 @@
         class="flex items-center cursor-pointer"
         @click="clickItem(item)"
       >
-        <img
-          class="mr-2"
-          src="../../assets/dir2.png"
-          width="40"
-          height="40"
-          alt=""
-        />
-        <div>{{ item.name }}</div>
+        <template v-if="item.isDir">
+          <img
+            class="mr-2"
+            src="../../assets/dir2.png"
+            width="40"
+            height="40"
+            alt=""
+          />
+          <div>{{ item.name }}</div>
+        </template>
       </div>
     </template>
     <div v-else class="flex justify-center items-center flex-col w-full h-full">
@@ -46,7 +48,7 @@ import type { FileItem } from '@/types/file'
 const getFileList = inject<() => void>('getFileList')
 
 const visible = ref(false)
-const current = ref<FileItem>()
+const current = ref<FileItem[]>([])
 const activeItem = ref<FileItem>()
 const dirList = ref<FileItem[]>([])
 
@@ -72,30 +74,31 @@ const clickItem = (item: FileItem) => {
 }
 
 const confirm = () => {
-  api.file
-    .updateFile({
-      id: current.value!.id as number,
-      dirId: activeItem.value!.id,
+  const arr: Promise<any>[] = current.value.map((item) => {
+    return api.file.updateFile({
+      id: item.id,
+      dirId: activeItem.value?.id || 0,
     })
-    .then((res) => {
-      if (res.code === 200) {
-        message.success(res.msg)
-        getFileList?.()
-        cancel()
-      } else {
-        message.error(res.msg)
-      }
+  })
+  Promise.all(arr)
+    .then(() => {
+      message.success('操作成功')
+      getFileList?.()
+      cancel()
+    })
+    .catch((err) => {
+      message.error(err)
     })
 }
 
 const cancel = () => {
-  current.value = undefined
+  current.value = []
   activeItem.value = undefined
   dirList.value = []
   visible.value = false
 }
 
-const open = (row: FileItem) => {
+const open = (row: FileItem[]) => {
   current.value = row
   visible.value = true
   geiAllDir()
