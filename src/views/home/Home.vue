@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between">
-    <div class="flex">
+    <div v-if="!selectList.length" class="flex">
       <a-dropdown>
         <a-upload
           multiple
@@ -57,6 +57,42 @@
         <div class="flex h-full items-center">
           <download-outlined class="text-sm" />
           <div class="ml-2 font-bold" @click="downloadFile">下载文件</div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="flex">
+      <div
+        class="flex items-center px-4 h-8 bg-[#f0faff] text-[#06a7ff] rounded-3xl cursor-pointer"
+      >
+        <div class="flex h-full items-center">
+          <share-alt-outlined class="text-sm" />
+          <div class="ml-2 font-bold">分享</div>
+        </div>
+        <a-divider type="vertical" />
+        <div class="flex h-full items-center">
+          <download-outlined class="text-sm" />
+          <div class="ml-2 font-bold">下载</div>
+        </div>
+        <a-divider type="vertical" />
+        <div class="flex h-full items-center">
+          <delete-outlined class="text-sm" />
+          <div class="ml-2 font-bold">删除</div>
+        </div>
+        <a-divider type="vertical" />
+        <div class="flex h-full items-center">
+          <copy-outlined class="text-sm" />
+          <div class="ml-2 font-bold">复制</div>
+        </div>
+        <a-divider v-if="selectList.length === 1" type="vertical" />
+        <div v-if="selectList.length === 1" class="flex h-full items-center">
+          <column-height-outlined class="text-sm" />
+          <div class="ml-2 font-bold">重命名</div>
+        </div>
+        <a-divider type="vertical" />
+        <div class="flex h-full items-center">
+          <drag-outlined class="text-sm" />
+          <div class="ml-2 font-bold">移动</div>
         </div>
       </div>
     </div>
