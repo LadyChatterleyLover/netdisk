@@ -551,7 +551,7 @@ const shareFile = (row: FileItem) => {
     message.warning('该文件已经分享过了,请在分享列表查看')
     return
   }
-  ShareFileRef.value?.open(row)
+  ShareFileRef.value?.open([row])
 }
 
 const delFile = (row: FileItem) => {

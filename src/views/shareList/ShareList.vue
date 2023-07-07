@@ -1,4 +1,10 @@
 <template>
+  <div v-if="selectList.length" class="mb-5">
+    <a-button type="primary" shape="round" @click="cancelShare(selectList)">
+      <template #icon><stop-outlined /></template>
+      取消分享</a-button
+    >
+  </div>
   <vxe-table ref="tableRef" :data="tableData">
     <vxe-column title="文件名" field="name">
       <template #header="{ column }">
@@ -106,26 +112,23 @@
           >复制链接</a-button
         >
         <poweroff-outlined style="color: #1890ff; margin-right: 2px" />
-        <a-popconfirm
-          :title="`确认要取消${row.name}的分享吗?`"
-          @confirm="cancelShare(row)"
+        <a-button
+          type="link"
+          style="padding: 0; margin-right: 8px"
+          class="mr-3"
+          @click="cancelShare([row.id])"
+          >取消分享</a-button
         >
-          <a-button
-            type="link"
-            style="padding: 0; margin-right: 8px"
-            class="mr-3"
-            >取消分享</a-button
-          >
-        </a-popconfirm>
       </template>
     </vxe-column>
   </vxe-table>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { createVNode, onMounted, ref, watch } from 'vue'
 import dayjs from 'dayjs'
-import { message } from 'ant-design-vue'
+import { Modal, message } from 'ant-design-vue'
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import api from '../../api'
 import { useCopy } from '../../hooks/useCopy'
 import type { FileItem } from '../../types/file'
@@ -200,19 +203,27 @@ const copyUrl = (row: FileItem) => {
   copy()
 }
 
-const cancelShare = (row: FileItem) => {
-  api.file
-    .cancelShare({
-      id: row.id as number,
-    })
-    .then((res) => {
-      if (res.code === 200) {
-        message.success(res.msg)
-        getFileList()
-      } else {
-        message.error(res.msg)
-      }
-    })
+const cancelShare = (ids: number[]) => {
+  Modal.confirm({
+    icon: createVNode(ExclamationCircleOutlined),
+    content:
+      '取消分享后，该条分享记录将被删除，好友将无法再访问此分享链接。 您确认要取消分享吗？',
+    onOk() {
+      api.file
+        .cancelShare({
+          ids,
+        })
+        .then((res) => {
+          if (res.code === 200) {
+            message.success(res.msg)
+            getFileList()
+            selectList.value = []
+          } else {
+            message.error(res.msg)
+          }
+        })
+    },
+  })
 }
 
 watch(

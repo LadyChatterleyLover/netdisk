@@ -39,7 +39,7 @@ export default {
     return post('/file/copyFile', params, true)
   },
   shareFile(params: {
-    id: number
+    ids: number[]
     effectiveTime: number
     extractedMethod: string
     extractedCode?: string
@@ -49,7 +49,7 @@ export default {
       url: string
     }>('/file/shareFile', params, true)
   },
-  cancelShare(params: { id: number }) {
+  cancelShare(params: { ids: number[] }) {
     return post('/file/cancelShare', params, true)
   },
   findFileByCode(params: { code: string }) {

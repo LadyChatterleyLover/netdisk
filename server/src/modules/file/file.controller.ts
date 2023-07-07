@@ -93,14 +93,14 @@ export class FileController {
   async shareFile(
     @Body()
     params: {
-      id: number
+      ids: number[]
       effectiveTime: number
       extractedMethod: string
       extractedCode?: string
     },
   ) {
     return this.fileService.shareFile(
-      params.id,
+      params.ids,
       params.effectiveTime,
       params.extractedMethod,
       params.extractedCode,
@@ -108,8 +108,8 @@ export class FileController {
   }
 
   @Post('cancelShare')
-  async cancelShare(@Body() params: { id: number }) {
-    return this.fileService.cancelShare(params.id)
+  async cancelShare(@Body() params: { ids: number[] }) {
+    return this.fileService.cancelShare(params.ids)
   }
 
   @Post('findFileByCode')

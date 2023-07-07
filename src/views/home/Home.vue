@@ -65,7 +65,7 @@
       <div
         class="flex items-center px-4 h-8 bg-[#f0faff] text-[#06a7ff] rounded-3xl cursor-pointer"
       >
-        <div class="flex h-full items-center">
+        <div class="flex h-full items-center" @click="shareFiles">
           <share-alt-outlined class="text-sm" />
           <div class="ml-2 font-bold">分享</div>
         </div>
@@ -120,6 +120,7 @@
     :upload="upload"
   />
   <MoveFile ref="MoveFileRef" />
+  <ShareFile ref="ShareFileRef" />
 </template>
 
 <script setup lang="ts">
@@ -140,6 +141,7 @@ import type {
 import api from '@/api'
 import FileList from '@/components/home/FileList.vue'
 import MoveFile from '@/components/moveFile/MoveFile.vue'
+import ShareFile from '@/components/shareFile/ShareFile.vue'
 import UploadProgress from '@/components/uploadProgress/UploadProgress.vue'
 import { useFileStore } from '@/stores/file'
 import { download } from '@/utils/util'
@@ -156,6 +158,7 @@ const fileStore = useFileStore()
 const fileList = computed(() => fileStore.fileList)
 
 const MoveFileRef = ref()
+const ShareFileRef = ref()
 const selectList = ref<FileItem[]>([])
 const uploadFileList = ref<RcFile[]>([])
 const fileListRef = ref()
@@ -277,6 +280,14 @@ const addFileToZip = async (zip: JSZip, url: string) => {
   const blob = await response.blob()
   const filename = url.slice(Math.max(0, url.lastIndexOf('/') + 1))
   zip.file(window.decodeURIComponent(filename), blob)
+}
+
+const shareFiles = () => {
+  if (selectList.value.some((item) => item.isShared === 1)) {
+    message.warning('选中的文件存在已经分享过的文件')
+    return
+  }
+  ShareFileRef.value?.open(selectList.value)
 }
 
 const moveFiles = () => {

@@ -248,8 +248,6 @@ export class FileService {
     }
     if (isShared) {
       query.andWhere({ isShared: 1 })
-    } else {
-      query.andWhere({ isShared: 0 })
     }
 
     query.orderBy('file.isDir', 'DESC')
@@ -286,7 +284,6 @@ export class FileService {
         id: updateFileDto.id,
       },
     })
-    delete updateFileDto.id
     const newData = Object.assign(data, { ...updateFileDto })
     if (updateFileDto.users && updateFileDto.users.length) {
       const users = await this.userRepository
@@ -434,22 +431,11 @@ export class FileService {
   }
 
   async shareFile(
-    id: number,
+    ids: number[],
     effectiveTime: number,
     extractedMethod: string,
     extractedCode?: string,
   ) {
-    const file = await this.fileRepository.findOne({
-      where: {
-        id,
-      },
-    })
-    if (!file) {
-      return {
-        code: 500,
-        msg: '文件不存在',
-      }
-    }
     let code = ''
     if (extractedMethod === 'custom') {
       if (!extractedCode) {
@@ -463,15 +449,18 @@ export class FileService {
       code = generateRandomCode()
     }
     const url = `${host}/${generateUUID()}`
-    const newFile = {
-      ...file,
-      shareAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      shareUrl: url,
-      isShared: 1,
-      expirationTime: effectiveTime,
-      extractedCode: code,
-    }
-    const res = await this.fileRepository.save(newFile)
+    const res = await this.fileRepository
+      .createQueryBuilder('file')
+      .update()
+      .set({
+        shareAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        shareUrl: url,
+        isShared: 1,
+        expirationTime: effectiveTime,
+        extractedCode: code,
+      })
+      .whereInIds(ids)
+      .execute()
     if (res) {
       return {
         code: 200,
@@ -489,20 +478,18 @@ export class FileService {
     }
   }
 
-  async cancelShare(id: number) {
-    const file = await this.fileRepository.findOne({
-      where: {
-        id,
-      },
-    })
-    const newFile = {
-      ...file,
-      isShared: 0,
-      shareAt: '',
-      shareUrl: '',
-      expirationTime: 0,
-    }
-    const res = await this.fileRepository.save(newFile)
+  async cancelShare(ids: number[]) {
+    const res = await this.fileRepository
+      .createQueryBuilder('file')
+      .update()
+      .set({
+        isShared: 0,
+        shareAt: '',
+        shareUrl: '',
+        expirationTime: 0,
+      })
+      .whereInIds(ids)
+      .execute()
     if (res) {
       return {
         code: 200,

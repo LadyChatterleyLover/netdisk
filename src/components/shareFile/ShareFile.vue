@@ -6,8 +6,8 @@
       :label-col="{ span: 6 }"
       :wrapper-col="{ span: 18 }"
     >
-      <a-form-item label="文件">
-        <div>{{ current!.name }}</div>
+      <a-form-item v-if="current.length === 1" label="文件">
+        <div>{{ current[0].name }}</div>
       </a-form-item>
       <a-form-item label="分享链接">
         <div>{{ shareData!.url }}</div>
@@ -46,11 +46,6 @@
         name="extractedMethod"
         :rules="[
           { required: true, message: '请选择提取码方式', trigger: 'change' },
-          {
-            pattern: /^[a-zA-Z0-9]{4}$/,
-            message: '提取码为4位数字和字母组合',
-            trigger: 'blur',
-          },
         ]"
       >
         <a-radio-group v-model:value="model.extractedMethod">
@@ -64,6 +59,11 @@
         name="extractedCode"
         :rules="[
           { required: true, message: '请输入自定义提取码', trigger: 'blur' },
+          {
+            pattern: /^[a-zA-Z0-9]{4}$/,
+            message: '提取码为4位数字和字母组合',
+            trigger: 'blur',
+          },
         ]"
       >
         <a-input v-model:value="model.extractedCode" size="small" allow-clear />
@@ -95,7 +95,7 @@ interface ShareData {
 }
 
 const visible = ref(false)
-const current = ref<FileItem>()
+const current = ref<FileItem[]>([])
 const formRef = ref<FormInstance>()
 const shareData = ref<ShareData>()
 const model = ref({
@@ -105,12 +105,13 @@ const model = ref({
 })
 
 const confirm = () => {
+  const ids = current.value.map((item) => item.id) as number[]
   formRef
     .value!.validate()
     .then(() => {
       api.file
         .shareFile({
-          id: current.value?.id as number,
+          ids,
           ...model.value,
         })
         .then((res) => {
@@ -128,7 +129,7 @@ const confirm = () => {
 }
 
 const cancel = () => {
-  current.value = undefined
+  current.value = []
   shareData.value = undefined
   model.value.effectiveTime = 7
   model.value.extractedCode = ''
@@ -144,7 +145,7 @@ const copyUrl = () => {
   copy()
 }
 
-const open = (row: FileItem) => {
+const open = (row: FileItem[]) => {
   current.value = row
   visible.value = true
 }
