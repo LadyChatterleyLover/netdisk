@@ -363,6 +363,12 @@ const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
   return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
 }
 
+const getUserInfo = () => {
+  api.user.getUserInfo().then((res) => {
+    userStore.setUser(res.data)
+  })
+}
+
 const selectAll = () => {
   indeterminate.value = false
   if (checkAll.value) {
@@ -444,7 +450,7 @@ const upload = (file: RcFile) => {
       getFileList?.({
         dirId: activeItem.value?.id,
       })
-      userStore.setUser(res.data.user!)
+      getUserInfo()
     } else {
       message.error(res.msg)
     }
@@ -567,6 +573,7 @@ const delFile = (row: FileItem) => {
           getFileList?.({
             dirId: activeItem.value?.id,
           })
+          getUserInfo()
         } else {
           message.error(res.msg)
         }

@@ -87,7 +87,7 @@ export class FileService {
         id: user_id,
       },
     })
-    const remainingMemory = Number(user.memory) - file.size
+    const remainingMemory = Number(user.remainingMemory) - file.size
     if (remainingMemory < 0) {
       return {
         code: 500,
@@ -309,7 +309,26 @@ export class FileService {
     }
   }
 
-  async recoveryFile(fileIds: number[]) {
+  // 回收文件
+  async recoveryFile(ids: number[], user_id: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: user_id,
+      },
+    })
+    const files = await this.fileRepository
+      .createQueryBuilder('file')
+      .whereInIds(ids)
+      .getMany()
+    let totalSize = 0
+    files.map((item) => {
+      totalSize += item.size
+    })
+    const newUser = {
+      ...user,
+      remainingMemory: String(Number(user.remainingMemory) + totalSize),
+    }
+    await this.userRepository.save(newUser)
     const res = await this.fileRepository
       .createQueryBuilder('file')
       .update()
@@ -317,8 +336,9 @@ export class FileService {
         isRecovery: 1,
         deleteAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       })
-      .whereInIds(fileIds)
+      .whereInIds(ids)
       .execute()
+
     if (res) {
       return {
         code: 200,
@@ -332,14 +352,33 @@ export class FileService {
     }
   }
 
-  async reductionFile(fileIds: number[]) {
+  // 还原文件
+  async reductionFile(ids: number[], user_id: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: user_id,
+      },
+    })
+    const files = await this.fileRepository
+      .createQueryBuilder('file')
+      .whereInIds(ids)
+      .getMany()
+    let totalSize = 0
+    files.map((item) => {
+      totalSize += item.size
+    })
+    const newUser = {
+      ...user,
+      remainingMemory: String(Number(user.remainingMemory) - totalSize),
+    }
+    await this.userRepository.save(newUser)
     const res = await this.fileRepository
       .createQueryBuilder('file')
       .update()
       .set({
         isRecovery: 0,
       })
-      .whereInIds(fileIds)
+      .whereInIds(ids)
       .execute()
     if (res) {
       return {

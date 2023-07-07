@@ -5,30 +5,11 @@ import {
   UseGuards,
   Req,
   Body,
-  Param,
-  Patch,
   UploadedFiles,
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import { FileService } from './file.service'
-import { Readable } from 'node:stream'
 import { AuthGuard } from '@nestjs/passport'
-import { UploadFile } from './dto/file.dto'
-
-/**
- * 将buffer转为Stream流
- * @param binary file.buffer
- * @returns
- */
-function bufferToStream(binary) {
-  const readableInstanceStream = new Readable({
-    read() {
-      this.push(binary)
-      this.push(null)
-    },
-  })
-  return readableInstanceStream
-}
 
 @Controller('file')
 @UseGuards(AuthGuard('jwt'))
@@ -88,13 +69,13 @@ export class FileController {
   }
 
   @Post('recoveryFile')
-  async recoveryFile(@Body() ids: number[]) {
-    return this.fileService.recoveryFile(ids)
+  async recoveryFile(@Body() ids: number[], @Req() req) {
+    return this.fileService.recoveryFile(ids, req.user.id)
   }
 
   @Post('reductionFile')
-  async reductionFile(@Body() ids: number[]) {
-    return this.fileService.reductionFile(ids)
+  async reductionFile(@Body() ids: number[], @Req() req) {
+    return this.fileService.reductionFile(ids, req.user.id)
   }
 
   @Post('updateFile')

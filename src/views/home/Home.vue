@@ -124,6 +124,12 @@ const loading = ref(false)
 const uploadProgress = ref(0)
 const UploadProgressRef = ref()
 
+const getUserInfo = () => {
+  api.user.getUserInfo().then((res) => {
+    userStore.setUser(res.data)
+  })
+}
+
 const getFileList = (
   params?: {
     name?: string
@@ -164,7 +170,7 @@ const upload = (file: RcFile) => {
       if (res.code === 200) {
         message.success(res.msg)
         getFileList()
-        userStore.setUser(res.data.user!)
+        getUserInfo()
       } else {
         message.error(res.msg)
       }

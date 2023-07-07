@@ -142,6 +142,7 @@ import dayjs from 'dayjs'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import api from '../../api'
+import { useUserStore } from '../../stores/user'
 import type { VxeColumnPropTypes, VxeTableInstance } from 'vxe-table'
 import type { FileItem } from '@/types/file'
 import { useFormatFileSize } from '@/hooks/useFormatFileSize'
@@ -161,6 +162,7 @@ const audioType = [
   'wv',
 ]
 
+const userStore = useUserStore()
 const fileStore = useFileStore()
 
 const tableData = computed(() => fileStore.fileList)
@@ -173,6 +175,12 @@ const formatterTime: VxeColumnPropTypes.Formatter<FileItem> = ({
   cellValue,
 }) => {
   return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
+}
+
+const getUserInfo = () => {
+  api.user.getUserInfo().then((res) => {
+    userStore.setUser(res.data)
+  })
 }
 
 const getFileList = () => {
@@ -243,6 +251,7 @@ const reductionFile = (row?: FileItem) => {
           getFileList()
           selectList.value = []
           checkAll.value = false
+          getUserInfo()
         } else {
           message.error(res.msg)
         }

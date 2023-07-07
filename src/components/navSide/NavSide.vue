@@ -48,11 +48,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../../stores/user'
 import { useFormatFileSize } from '../../hooks/useFormatFileSize/index'
 import HomeSide from './HomeSide.vue'
+import api from '@/api'
 
 interface MenuItem {
   name: string
@@ -90,10 +91,20 @@ const menuList: MenuItem[] = [
   },
 ]
 
+const getUserInfo = () => {
+  api.user.getUserInfo().then((res) => {
+    userStore.setUser(res.data)
+  })
+}
+
 const clickItem = (item: MenuItem) => {
   activeIndex.value = item.path
   router.push(item.path)
 }
+
+onMounted(() => {
+  getUserInfo()
+})
 </script>
 
 <style scoped lang="scss">

@@ -67,4 +67,24 @@ export class UserService {
         }
     }
   }
+
+  async getUser(userId: number) {
+    const res = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    })
+    if (res) {
+      return {
+        code: 200,
+        msg: '查询成功',
+        data: res,
+      }
+    } else {
+      return {
+        code: 500,
+        msg: '查询失败',
+      }
+    }
+  }
 }

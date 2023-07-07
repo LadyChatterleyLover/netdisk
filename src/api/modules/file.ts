@@ -1,6 +1,7 @@
 import { post } from '../request'
 import type { AxiosProgressEvent } from 'axios'
 import type { FileItem } from '@/types/file'
+import type { UserInfo } from '@/types/user'
 
 export default {
   uploadFile(
@@ -26,10 +27,10 @@ export default {
     return post('/file/patchDelete', ids, true)
   },
   recoveryFile(ids: number[]) {
-    return post('/file/recoveryFile', ids, true)
+    return post<UserInfo>('/file/recoveryFile', ids, true)
   },
   reductionFile(ids: number[]) {
-    return post('/file/reductionFile', ids, true)
+    return post<UserInfo>('/file/reductionFile', ids, true)
   },
   updateFile(params: any) {
     return post(`/file/updateFile`, params, true)
